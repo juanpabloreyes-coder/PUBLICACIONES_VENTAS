@@ -1,0 +1,29 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: es-MX
+	dataAccessOptions
+		fastCombine
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["VENTAS_activities_docs_activities","HISTORIAL_PUBLICACIONES_MODELOS","PUBLICACIONES_MODELOS","DimProyectoConcurso","admin_users","EquiposIntegrantesVENTAS"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table VENTAS_activities_docs_activities
+ref table HISTORIAL_PUBLICACIONES_MODELOS
+ref table DateTableTemplate_5107ba56-b8f5-4a7d-be35-bc039ad07f0c
+ref table LocalDateTable_4d746028-3fa5-4967-a453-40bb6b660597
+ref table LocalDateTable_b47e73b3-a0a7-4bc5-a894-0bdaefc5dc98
+ref table LocalDateTable_b418c9c9-9b4d-4a3b-8ecd-14624848fa52
+ref table PUBLICACIONES_MODELOS
+ref table DimProyectoConcurso
+ref table LocalDateTable_980a06ac-00e1-43d3-a475-a89a54a9d39e
+ref table admin_users
+ref table EquiposIntegrantesVENTAS
+
+ref cultureInfo en-US
+

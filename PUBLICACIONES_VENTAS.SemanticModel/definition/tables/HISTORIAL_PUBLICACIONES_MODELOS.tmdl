@@ -1,0 +1,711 @@
+table HISTORIAL_PUBLICACIONES_MODELOS
+	lineageTag: 415026d1-07e0-441c-8587-22763d4024c7
+
+	column Modelo
+		dataType: string
+		lineageTag: f9389d36-cbe1-43d6-984b-e6a286fb291a
+		summarizeBy: none
+		sourceColumn: Modelo
+
+		annotation SummarizationSetBy = Automatic
+
+	column Version
+		dataType: string
+		lineageTag: ba1362da-3a62-43c9-a65a-148646206cda
+		summarizeBy: none
+		sourceColumn: Version
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fecha y hora de publicación'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 790d17bc-8dc2-43aa-bd4f-7aaf4d0af7aa
+		summarizeBy: none
+		sourceColumn: Fecha y hora de publicación
+
+		variation Variation
+			isDefault
+			relationship: c68fcc53-2e5b-454d-9ca2-34b20423ad39
+			defaultHierarchy: LocalDateTable_4d746028-3fa5-4967-a453-40bb6b660597.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Fecha
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 79bccc63-dc60-46d3-b519-561d1c4c8ad6
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		variation Variation
+			isDefault
+			relationship: 455456d7-dcb6-4b8c-a9cc-6c8d13217556
+			defaultHierarchy: LocalDateTable_b47e73b3-a0a7-4bc5-a894-0bdaefc5dc98.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Inicio de mes'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: ce7d44b1-ccfb-47a5-93cf-59c112a9e5d6
+		summarizeBy: none
+		sourceColumn: Inicio de mes
+
+		variation Variation
+			isDefault
+			relationship: f2c499ac-8740-49de-960b-568cb4c57a07
+			defaultHierarchy: LocalDateTable_b418c9c9-9b4d-4a3b-8ecd-14624848fa52.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Año
+		dataType: int64
+		formatString: 0
+		lineageTag: 3f0e9c44-771f-4e68-953d-713904a3f821
+		summarizeBy: sum
+		sourceColumn: Año
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Número de mes'
+		dataType: int64
+		formatString: 0
+		lineageTag: 3f3f9624-9aea-4ddc-9566-d4acf64f0943
+		summarizeBy: sum
+		sourceColumn: Número de mes
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mes
+		dataType: string
+		lineageTag: d8e39c4b-c0f3-44fc-9da4-8a3b20b790aa
+		summarizeBy: none
+		sourceColumn: Mes
+
+		annotation SummarizationSetBy = Automatic
+
+	column Año-Mes
+		dataType: string
+		lineageTag: c90b051f-122e-40d6-96e2-350a6d241fe0
+		summarizeBy: none
+		sourceColumn: Año-Mes
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Id de publicación'
+		dataType: string
+		lineageTag: 277ea19a-0e4e-424f-8b24-41f367b3f551
+		summarizeBy: none
+		sourceColumn: Id de publicación
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Id de modelo'
+		dataType: string
+		lineageTag: 2398ea5b-cf19-4ac0-8e70-a6a7d311b37b
+		summarizeBy: none
+		sourceColumn: Id de modelo
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProyectoConcurso
+		dataType: string
+		lineageTag: a18451d9-b496-43a0-b43c-5d9ab132fdcc
+		summarizeBy: none
+		sourceColumn: ProyectoConcurso
+
+		annotation SummarizationSetBy = Automatic
+
+	column Disciplina
+		dataType: string
+		lineageTag: d09eda79-6199-4dd3-90b7-93d9a84cc6c9
+		summarizeBy: none
+		sourceColumn: Disciplina
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Publicado por'
+		dataType: string
+		lineageTag: d6e9a238-3fe8-4799-a854-84300780fc72
+		summarizeBy: none
+		sourceColumn: Publicado por
+
+		annotation SummarizationSetBy = Automatic
+
+	column Equipo
+		dataType: string
+		lineageTag: bf0bc2be-b8b3-40af-a3da-67d6bdd06f62
+		summarizeBy: none
+		sourceColumn: Equipo
+
+		annotation SummarizationSetBy = Automatic
+
+	partition HISTORIAL_PUBLICACIONES_MODELOS = m
+		mode: import
+		source =
+				let
+				    // ============================================================
+				    // 1. FUENTE
+				    // ============================================================
+				    Source = VENTAS_activities_docs_activities,
+				
+				    // ============================================================
+				    // 2. COLUMNAS NECESARIAS DE ACC
+				    // ============================================================
+				    #"Columnas necesarias" = Table.SelectColumns(
+				        Source,
+				        {
+				            "activity_id",
+				            "activity_verb",
+				            "created_by",
+				            "created_at",
+				            "object_display_name",
+				            "object_file_name",
+				            "object_folder_display_name",
+				            "object_id",
+				            "object_object_type",
+				            "object_version"
+				        },
+				        MissingField.UseNull
+				    ),
+				
+				    // ============================================================
+				    // 3. NOMBRE DEL MODELO
+				    // ============================================================
+				    #"Nombre del modelo" = Table.AddColumn(
+				        #"Columnas necesarias",
+				        "Modelo",
+				        each
+				            let
+				                DisplayNameValue = try [object_display_name] otherwise null,
+				                FileNameValue = try [object_file_name] otherwise null,
+				
+				                DisplayName =
+				                    if DisplayNameValue = null
+				                    then ""
+				                    else Text.Trim(Text.From(DisplayNameValue)),
+				
+				                FileName =
+				                    if FileNameValue = null
+				                    then ""
+				                    else Text.Trim(Text.From(FileNameValue))
+				            in
+				                if DisplayName <> "" then DisplayName else FileName,
+				        type text
+				    ),
+				
+				    // ============================================================
+				    // 4. PROYECTO CONCURSO
+				    // ============================================================
+				    #"ProyectoConcurso vinculado" = Table.NestedJoin(
+				        #"Nombre del modelo",
+				        {"object_id"},
+				        DimProyectoConcurso,
+				        {"linked_document_urn"},
+				        "__ProyectoInfo",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    #"ProyectoConcurso expandido" = Table.ExpandTableColumn(
+				        #"ProyectoConcurso vinculado",
+				        "__ProyectoInfo",
+				        {"ProyectoConcurso"},
+				        {"ProyectoConcurso"}
+				    ),
+				
+				    #"ProyectoConcurso resuelto" = Table.TransformColumns(
+				        #"ProyectoConcurso expandido",
+				        {
+				            {
+				                "ProyectoConcurso",
+				                each
+				                    let
+				                        p =
+				                            if _ = null
+				                            then ""
+				                            else try Text.Trim(Text.From(_)) otherwise ""
+				                    in
+				                        if p = ""
+				                        then "SIN PROYECTO IDENTIFICADO"
+				                        else p,
+				                type text
+				            }
+				        }
+				    ),
+				
+				    // ============================================================
+				    // 5. DISCIPLINA
+				    // Misma lógica usada en ISSUES_VENTAS
+				    // ============================================================
+				    #"Disciplina agregada" = Table.AddColumn(
+				        #"ProyectoConcurso resuelto",
+				        "Disciplina",
+				        each
+				            let
+				                Archivo =
+				                    if [Modelo] = null
+				                    then ""
+				                    else try Text.Upper(Text.From([Modelo])) otherwise ""
+				            in
+				                if Text.Contains(Archivo, "ARQ")
+				                    or Text.Contains(Archivo, "ARC")
+				                then "ARQUITECTURA"
+				
+				                else if Text.Contains(Archivo, "EST")
+				                    or Text.Contains(Archivo, "STR")
+				                then "ESTRUCTURA"
+				
+				                else if Text.Contains(Archivo, "ELE")
+				                then "ELECTRICA"
+				
+				                else if Text.Contains(Archivo, "ESP")
+				                    or Text.Contains(Archivo, "SPE")
+				                then "ESPECIALES"
+				
+				                else if Text.Contains(Archivo, "MEC")
+				                then "MECANICA"
+				
+				                else if Text.Contains(Archivo, "PLO")
+				                    or Text.Contains(Archivo, "PLU")
+				                then "PLOMERIA"
+				
+				                else "SIN DISCIPLINA",
+				        type text
+				    ),
+				
+				    // ============================================================
+				    // 6. USUARIOS ACC
+				    // ============================================================
+				    Usuarios = Table.SelectColumns(
+				        admin_users,
+				        {
+				            "id",
+				            "autodesk_id",
+				            "name"
+				        },
+				        MissingField.UseNull
+				    ),
+				
+				    UsuariosPorId = Table.Group(
+				        Table.SelectRows(
+				            Usuarios,
+				            each [id] <> null
+				        ),
+				        {"id"},
+				        {
+				            {
+				                "name",
+				                each
+				                    try
+				                        List.First(
+				                            List.RemoveNulls([name])
+				                        )
+				                    otherwise null,
+				                type nullable text
+				            }
+				        }
+				    ),
+				
+				    UsuariosPorAutodesk = Table.Group(
+				        Table.SelectRows(
+				            Usuarios,
+				            each [autodesk_id] <> null
+				        ),
+				        {"autodesk_id"},
+				        {
+				            {
+				                "name",
+				                each
+				                    try
+				                        List.First(
+				                            List.RemoveNulls([name])
+				                        )
+				                    otherwise null,
+				                type nullable text
+				            }
+				        }
+				    ),
+				
+				    // ============================================================
+				    // 7. RESOLVER QUIÉN PUBLICÓ
+				    // ============================================================
+				    #"Usuario por ID" = Table.NestedJoin(
+				        #"Disciplina agregada",
+				        {"created_by"},
+				        UsuariosPorId,
+				        {"id"},
+				        "__UsuarioId",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    #"Usuario ID expandido" = Table.ExpandTableColumn(
+				        #"Usuario por ID",
+				        "__UsuarioId",
+				        {"name"},
+				        {"__NombreId"}
+				    ),
+				
+				    #"Usuario por Autodesk" = Table.NestedJoin(
+				        #"Usuario ID expandido",
+				        {"created_by"},
+				        UsuariosPorAutodesk,
+				        {"autodesk_id"},
+				        "__UsuarioAutodesk",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    #"Usuario Autodesk expandido" = Table.ExpandTableColumn(
+				        #"Usuario por Autodesk",
+				        "__UsuarioAutodesk",
+				        {"name"},
+				        {"__NombreAutodesk"}
+				    ),
+				
+				    #"Publicado por agregado" = Table.AddColumn(
+				        #"Usuario Autodesk expandido",
+				        "Publicado por",
+				        each
+				            let
+				                NombreId =
+				                    if [__NombreId] = null
+				                    then ""
+				                    else try Text.Trim(Text.From([__NombreId])) otherwise "",
+				
+				                NombreAutodesk =
+				                    if [__NombreAutodesk] = null
+				                    then ""
+				                    else try Text.Trim(Text.From([__NombreAutodesk])) otherwise ""
+				            in
+				                if NombreId <> ""
+				                then NombreId
+				                else if NombreAutodesk <> ""
+				                then NombreAutodesk
+				                else "Usuario no encontrado",
+				        type text
+				    ),
+				
+				    // ============================================================
+				    // 8. NORMALIZAR NOMBRE
+				    // CORREGIDO PARA NULL
+				    // ============================================================
+				    NormalizarNombre = (valor as any) as text =>
+				        let
+				            TextoBase =
+				                if valor = null
+				                then ""
+				                else try Text.From(valor) otherwise "",
+				
+				            Limpio =
+				                Text.Trim(
+				                    Text.Clean(TextoBase)
+				                ),
+				
+				            Mayusculas =
+				                Text.Upper(Limpio),
+				
+				            SinDiacriticos = List.Accumulate(
+				                {
+				                    {"Á", "A"},
+				                    {"É", "E"},
+				                    {"Í", "I"},
+				                    {"Ó", "O"},
+				                    {"Ú", "U"},
+				                    {"Ü", "U"}
+				                },
+				                Mayusculas,
+				                (estado, par) =>
+				                    Text.Replace(
+				                        estado,
+				                        par{0},
+				                        par{1}
+				                    )
+				            )
+				        in
+				            SinDiacriticos,
+				
+				    #"IntegranteKey agregado" = Table.AddColumn(
+				        #"Publicado por agregado",
+				        "__IntegranteKey",
+				        each NormalizarNombre([Publicado por]),
+				        type text
+				    ),
+				
+				    // ============================================================
+				    // 9. EQUIPO
+				    // ============================================================
+				    #"Equipo vinculado" = Table.NestedJoin(
+				        #"IntegranteKey agregado",
+				        {"__IntegranteKey"},
+				        EquiposIntegrantesVENTAS,
+				        {"IntegranteKey"},
+				        "__EquipoInfo",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    #"Equipo expandido" = Table.ExpandTableColumn(
+				        #"Equipo vinculado",
+				        "__EquipoInfo",
+				        {"Equipo"},
+				        {"__EquipoAsignado"}
+				    ),
+				
+				    #"Equipo agregado" = Table.AddColumn(
+				        #"Equipo expandido",
+				        "Equipo",
+				        each
+				            let
+				                e =
+				                    if [__EquipoAsignado] = null
+				                    then ""
+				                    else try Text.Trim(Text.From([__EquipoAsignado])) otherwise ""
+				            in
+				                if e = ""
+				                then "SIN EQUIPO"
+				                else e,
+				        type text
+				    ),
+				
+				    // ============================================================
+				    // 10. PUBLICACIONES RVT EN WIP
+				    // ============================================================
+				    #"Publicaciones RVT en WIP" = Table.SelectRows(
+				        #"Equipo agregado",
+				        each
+				            [activity_verb] = "upload-entity"
+				
+				            and [object_object_type] = "items:autodesk.bim360:File"
+				
+				            and [activity_id] <> null
+				            and [object_id] <> null
+				            and [created_at] <> null
+				            and [object_version] <> null
+				
+				            and [Modelo] <> null
+				
+				            and Text.EndsWith(
+				                [Modelo],
+				                ".rvt",
+				                Comparer.OrdinalIgnoreCase
+				            )
+				
+				            and (
+				                try
+				                    Text.StartsWith(
+				                        Text.From(
+				                            [object_folder_display_name]
+				                        ),
+				                        "011"
+				                    )
+				                otherwise false
+				            )
+				    ),
+				
+				    // ============================================================
+				    // 11. EVENTOS ÚNICOS
+				    // ============================================================
+				    #"Eventos únicos" = Table.Distinct(
+				        #"Publicaciones RVT en WIP",
+				        {"activity_id"}
+				    ),
+				
+				    // ============================================================
+				    // 12. CAMPOS DE SALIDA
+				    // ============================================================
+				    #"Campos de salida" = Table.SelectColumns(
+				        #"Eventos únicos",
+				        {
+				            "ProyectoConcurso",
+				            "Modelo",
+				            "Disciplina",
+				            "Publicado por",
+				            "Equipo",
+				            "object_version",
+				            "created_at",
+				            "activity_id",
+				            "object_id"
+				        }
+				    ),
+				
+				    // ============================================================
+				    // 13. RENOMBRAR CAMPOS
+				    // ============================================================
+				    #"Columnas renombradas" = Table.RenameColumns(
+				        #"Campos de salida",
+				        {
+				            {
+				                "object_version",
+				                "Version"
+				            },
+				            {
+				                "created_at",
+				                "Fecha y hora de publicación"
+				            },
+				            {
+				                "activity_id",
+				                "Id de publicación"
+				            },
+				            {
+				                "object_id",
+				                "Id de modelo"
+				            }
+				        }
+				    ),
+				
+				    // ============================================================
+				    // 14. HORA AGUASCALIENTES
+				    // ============================================================
+				    #"Hora de Aguascalientes" = Table.TransformColumns(
+				        #"Columnas renombradas",
+				        {
+				            {
+				                "Fecha y hora de publicación",
+				                each
+				                    if _ = null
+				                    then null
+				                    else
+				                        DateTimeZone.RemoveZone(
+				                            DateTimeZone.SwitchZone(
+				                                DateTime.AddZone(
+				                                    DateTime.From(_),
+				                                    0
+				                                ),
+				                                -6
+				                            )
+				                        ),
+				                type nullable datetime
+				            }
+				        }
+				    ),
+				
+				    // ============================================================
+				    // 15. FECHA
+				    // ============================================================
+				    #"Fecha agregada" = Table.AddColumn(
+				        #"Hora de Aguascalientes",
+				        "Fecha",
+				        each
+				            if [Fecha y hora de publicación] = null
+				            then null
+				            else Date.From([Fecha y hora de publicación]),
+				        type nullable date
+				    ),
+				
+				    #"Inicio de mes agregado" = Table.AddColumn(
+				        #"Fecha agregada",
+				        "Inicio de mes",
+				        each
+				            if [Fecha] = null
+				            then null
+				            else Date.StartOfMonth([Fecha]),
+				        type nullable date
+				    ),
+				
+				    #"Año agregado" = Table.AddColumn(
+				        #"Inicio de mes agregado",
+				        "Año",
+				        each
+				            if [Fecha] = null
+				            then null
+				            else Date.Year([Fecha]),
+				        Int64.Type
+				    ),
+				
+				    #"Número de mes agregado" = Table.AddColumn(
+				        #"Año agregado",
+				        "Número de mes",
+				        each
+				            if [Fecha] = null
+				            then null
+				            else Date.Month([Fecha]),
+				        Int64.Type
+				    ),
+				
+				    #"Mes agregado" = Table.AddColumn(
+				        #"Número de mes agregado",
+				        "Mes",
+				        each
+				            if [Fecha] = null
+				            then null
+				            else
+				                Text.Proper(
+				                    Date.ToText(
+				                        [Fecha],
+				                        "MMMM",
+				                        "es-MX"
+				                    )
+				                ),
+				        type nullable text
+				    ),
+				
+				    #"Año-Mes agregado" = Table.AddColumn(
+				        #"Mes agregado",
+				        "Año-Mes",
+				        each
+				            if [Fecha] = null
+				            then null
+				            else
+				                Date.ToText(
+				                    [Fecha],
+				                    "yyyy-MM",
+				                    "es-MX"
+				                ),
+				        type nullable text
+				    ),
+				
+				    // ============================================================
+				    // 16. COLUMNAS FINALES
+				    // ============================================================
+				    #"Columnas finales" = Table.SelectColumns(
+				        #"Año-Mes agregado",
+				        {
+				            "ProyectoConcurso",
+				            "Modelo",
+				            "Disciplina",
+				            "Publicado por",
+				            "Equipo",
+				            "Version",
+				            "Fecha y hora de publicación",
+				            "Fecha",
+				            "Inicio de mes",
+				            "Año",
+				            "Número de mes",
+				            "Mes",
+				            "Año-Mes",
+				            "Id de publicación",
+				            "Id de modelo"
+				        }
+				    ),
+				
+				    // ============================================================
+				    // 17. ORDEN FINAL
+				    // ============================================================
+				    #"Historial ordenado" = Table.Sort(
+				        #"Columnas finales",
+				        {
+				            {
+				                "Fecha y hora de publicación",
+				                Order.Descending
+				            },
+				            {
+				                "ProyectoConcurso",
+				                Order.Ascending
+				            },
+				            {
+				                "Modelo",
+				                Order.Ascending
+				            }
+				        }
+				    )
+				
+				in
+				    #"Historial ordenado"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

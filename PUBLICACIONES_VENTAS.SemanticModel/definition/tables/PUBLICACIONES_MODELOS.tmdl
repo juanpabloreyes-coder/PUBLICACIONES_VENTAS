@@ -1,0 +1,145 @@
+table PUBLICACIONES_MODELOS
+	lineageTag: a4d55956-4473-467e-acd4-345bdee11fd0
+
+	column 'Id de modelo'
+		dataType: string
+		lineageTag: 18ece8b1-79c8-4c9c-a7db-2df25f820b6a
+		summarizeBy: none
+		sourceColumn: Id de modelo
+
+		annotation SummarizationSetBy = Automatic
+
+	column Modelo
+		dataType: string
+		lineageTag: 0d4cc1a2-9df1-429d-a070-84e91c083f84
+		summarizeBy: none
+		sourceColumn: Modelo
+
+		annotation SummarizationSetBy = Automatic
+
+	column Version
+		dataType: string
+		lineageTag: 1ac30be7-74bb-45b8-b44e-bf4b3b94d692
+		summarizeBy: none
+		sourceColumn: Version
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProyectoConcurso
+		dataType: string
+		lineageTag: 035a0cc4-f05e-4117-8fc2-64b7a6357823
+		summarizeBy: none
+		sourceColumn: ProyectoConcurso
+
+		annotation SummarizationSetBy = Automatic
+
+	column Disciplina
+		dataType: string
+		lineageTag: 8f658746-4592-48f7-a2ce-2b2321ee0268
+		summarizeBy: none
+		sourceColumn: Disciplina
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Publicado por'
+		dataType: string
+		lineageTag: 29aad18b-3205-4eb3-8f48-877750a78db6
+		summarizeBy: none
+		sourceColumn: Publicado por
+
+		annotation SummarizationSetBy = Automatic
+
+	column Equipo
+		dataType: string
+		lineageTag: 68325fb1-b808-4835-a4b0-897a904e0ceb
+		summarizeBy: none
+		sourceColumn: Equipo
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fecha de la última publicación'
+		dataType: string
+		lineageTag: b3319fe3-fa63-41b3-8e72-0947db97d23e
+		summarizeBy: none
+		sourceColumn: Fecha de la última publicación
+
+		annotation SummarizationSetBy = Automatic
+
+	partition PUBLICACIONES_MODELOS = m
+		mode: import
+		source =
+				let
+				    Source = HISTORIAL_PUBLICACIONES_MODELOS,
+				
+				    #"Ultima publicacion por modelo" = Table.Group(
+				        Source,
+				        {"ProyectoConcurso", "Id de modelo"},
+				        {
+				            {
+				                "Registro",
+				                each
+				                    Table.FirstN(
+				                        Table.Sort(
+				                            _,
+				                            {
+				                                {"Fecha y hora de publicación", Order.Descending},
+				                                {"Version", Order.Descending}
+				                            }
+				                        ),
+				                        1
+				                    ),
+				                type table
+				            }
+				        }
+				    ),
+				
+				    #"Registro expandido" = Table.ExpandTableColumn(
+				        #"Ultima publicacion por modelo",
+				        "Registro",
+				        {
+				            "Modelo",
+				            "Disciplina",
+				            "Publicado por",
+				            "Equipo",
+				            "Version",
+				            "Fecha y hora de publicación"
+				        },
+				        {
+				            "Modelo",
+				            "Disciplina",
+				            "Publicado por",
+				            "Equipo",
+				            "Version",
+				            "Fecha de la última publicación"
+				        }
+				    ),
+				
+				    #"Columnas finales" = Table.SelectColumns(
+				        #"Registro expandido",
+				        {
+				            "ProyectoConcurso",
+				            "Modelo",
+				            "Disciplina",
+				            "Publicado por",
+				            "Equipo",
+				            "Version",
+				            "Fecha de la última publicación",
+				            "Id de modelo"
+				        }
+				    ),
+				
+				    #"Informacion ordenada" = Table.Sort(
+				        #"Columnas finales",
+				        {
+				            {"ProyectoConcurso", Order.Ascending},
+				            {"Disciplina", Order.Ascending},
+				            {"Modelo", Order.Ascending}
+				        }
+				    )
+				in
+				    #"Informacion ordenada"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

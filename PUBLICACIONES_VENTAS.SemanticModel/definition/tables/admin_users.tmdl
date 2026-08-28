@@ -1,0 +1,226 @@
+table admin_users
+	lineageTag: bdaa3584-9902-4ece-abbd-8f5a8bf02231
+
+	column id
+		dataType: string
+		lineageTag: f0aacfba-107b-4fc3-a926-1f1ce467b950
+		summarizeBy: none
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column autodesk_id
+		dataType: string
+		lineageTag: 93899f0a-3f7d-427d-983a-8ce6b08b14d9
+		summarizeBy: none
+		sourceColumn: autodesk_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column bim360_account_id
+		dataType: string
+		lineageTag: 832cf482-350b-4fc8-9009-3c386734dd3a
+		summarizeBy: none
+		sourceColumn: bim360_account_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column email
+		dataType: string
+		lineageTag: fc9bc34b-0aaf-4041-8822-a538b755877d
+		summarizeBy: none
+		sourceColumn: email
+
+		annotation SummarizationSetBy = Automatic
+
+	column name
+		dataType: string
+		lineageTag: 84062a7a-cda8-401f-8092-7ae1895d3253
+		summarizeBy: none
+		sourceColumn: name
+
+		annotation SummarizationSetBy = Automatic
+
+	column first_name
+		dataType: string
+		lineageTag: b1abce93-d017-4791-9df1-07833f158d4d
+		summarizeBy: none
+		sourceColumn: first_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_name
+		dataType: string
+		lineageTag: e52eae09-3217-4f07-a02e-64be97d08850
+		summarizeBy: none
+		sourceColumn: last_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column address_line1
+		dataType: string
+		lineageTag: 0e5d3ab7-6fd0-456b-8218-1c0d7f93398f
+		summarizeBy: none
+		sourceColumn: address_line1
+
+		annotation SummarizationSetBy = Automatic
+
+	column address_line2
+		dataType: string
+		lineageTag: 51f10264-0858-4f31-b687-090d8f6b87d4
+		summarizeBy: none
+		sourceColumn: address_line2
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: c10a290e-386f-4dfc-91e3-fe5a6eed562d
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column state_or_province
+		dataType: string
+		lineageTag: cc6cb356-7001-427d-bb2d-deca247f2d0a
+		summarizeBy: none
+		sourceColumn: state_or_province
+
+		annotation SummarizationSetBy = Automatic
+
+	column postal_code
+		dataType: string
+		lineageTag: 859159d0-144f-44df-92f8-95de645c7419
+		summarizeBy: none
+		sourceColumn: postal_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		lineageTag: 8b5385d6-b85e-4eb4-8f5c-88bf56e03346
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_sign_in
+		dataType: string
+		lineageTag: f32ca82a-d674-4b7b-b20b-c1f9b68d71d2
+		summarizeBy: none
+		sourceColumn: last_sign_in
+
+		annotation SummarizationSetBy = Automatic
+
+	column phone
+		dataType: string
+		lineageTag: cd43c0a5-be50-4cde-912a-d9911d8af9ed
+		summarizeBy: none
+		sourceColumn: phone
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_title
+		dataType: string
+		lineageTag: 7dc0ca5c-9042-4cab-8e23-272aa59a073c
+		summarizeBy: none
+		sourceColumn: job_title
+
+		annotation SummarizationSetBy = Automatic
+
+	column access_level_account_admin
+		dataType: string
+		lineageTag: 579e55e3-4b04-44e4-81c9-129d604242f7
+		summarizeBy: none
+		sourceColumn: access_level_account_admin
+
+		annotation SummarizationSetBy = Automatic
+
+	column access_level_project_admin
+		dataType: string
+		lineageTag: 5d59e9c4-7cf4-42f9-8bd7-813c3484b924
+		summarizeBy: none
+		sourceColumn: access_level_project_admin
+
+		annotation SummarizationSetBy = Automatic
+
+	column access_level_project_member
+		dataType: string
+		lineageTag: 30a1ca00-4817-4ec3-9f3e-86e68802434d
+		summarizeBy: none
+		sourceColumn: access_level_project_member
+
+		annotation SummarizationSetBy = Automatic
+
+	column access_level_executive
+		dataType: string
+		lineageTag: bd10b817-e8c2-49ba-aa6e-5871dc6d3603
+		summarizeBy: none
+		sourceColumn: access_level_executive
+
+		annotation SummarizationSetBy = Automatic
+
+	column default_role_id
+		dataType: string
+		lineageTag: f6b4b211-7ad5-4a63-8cc8-2b26ad5a836f
+		summarizeBy: none
+		sourceColumn: default_role_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column default_company_id
+		dataType: string
+		lineageTag: 30817563-8cba-4825-9086-38c00ccd7cc8
+		summarizeBy: none
+		sourceColumn: default_company_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: d176ab56-d949-4435-a5c9-27327b3249d9
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column status_reason
+		dataType: string
+		lineageTag: 9d58de84-75fc-4540-b411-c20be0befe74
+		summarizeBy: none
+		sourceColumn: status_reason
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at
+		dataType: string
+		lineageTag: bad7df5a-69d9-479d-ae35-74f0e895c713
+		summarizeBy: none
+		sourceColumn: created_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column updated_at
+		dataType: string
+		lineageTag: 3ac2293b-76fc-49e9-9e11-d1fc267f5565
+		summarizeBy: none
+		sourceColumn: updated_at
+
+		annotation SummarizationSetBy = Automatic
+
+	partition admin_users = m
+		mode: import
+		source =
+				let
+				    Source = AutodeskConstructionCloud.Feed("United States"),
+				    #"17fefe95-3b69-4d44-bb94-0cbec2173aea" = Source{[Key="17fefe95-3b69-4d44-bb94-0cbec2173aea"]}[Data],
+				    #"Account Extract" = #"17fefe95-3b69-4d44-bb94-0cbec2173aea"{[Name="Account Extract"]}[Data],
+				    admin_users1 = #"Account Extract"{[Name="admin_users"]}[Data]
+				in
+				    admin_users1
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

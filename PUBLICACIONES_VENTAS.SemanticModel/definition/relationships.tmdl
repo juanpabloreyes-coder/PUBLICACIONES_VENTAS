@@ -1,0 +1,26 @@
+relationship c68fcc53-2e5b-454d-9ca2-34b20423ad39
+	joinOnDateBehavior: datePartOnly
+	fromColumn: HISTORIAL_PUBLICACIONES_MODELOS.'Fecha y hora de publicación'
+	toColumn: LocalDateTable_4d746028-3fa5-4967-a453-40bb6b660597.Date
+
+relationship 455456d7-dcb6-4b8c-a9cc-6c8d13217556
+	joinOnDateBehavior: datePartOnly
+	fromColumn: HISTORIAL_PUBLICACIONES_MODELOS.Fecha
+	toColumn: LocalDateTable_b47e73b3-a0a7-4bc5-a894-0bdaefc5dc98.Date
+
+relationship f2c499ac-8740-49de-960b-568cb4c57a07
+	joinOnDateBehavior: datePartOnly
+	fromColumn: HISTORIAL_PUBLICACIONES_MODELOS.'Inicio de mes'
+	toColumn: LocalDateTable_b418c9c9-9b4d-4a3b-8ecd-14624848fa52.Date
+
+relationship ab3d9152-82ed-4069-ad1b-a49d3920b9cf
+	joinOnDateBehavior: datePartOnly
+	fromColumn: DimProyectoConcurso.UltimaActividad
+	toColumn: LocalDateTable_980a06ac-00e1-43d3-a475-a89a54a9d39e.Date
+
+relationship AutoDetected_f0e0d70f-b3c5-473e-8130-0d376d6fc7cd
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: PUBLICACIONES_MODELOS.ProyectoConcurso
+	toColumn: HISTORIAL_PUBLICACIONES_MODELOS.ProyectoConcurso
+
