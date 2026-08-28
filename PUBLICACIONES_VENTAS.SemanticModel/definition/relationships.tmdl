@@ -18,9 +18,3 @@ relationship ab3d9152-82ed-4069-ad1b-a49d3920b9cf
 	fromColumn: DimProyectoConcurso.UltimaActividad
 	toColumn: LocalDateTable_980a06ac-00e1-43d3-a475-a89a54a9d39e.Date
 
-relationship AutoDetected_f0e0d70f-b3c5-473e-8130-0d376d6fc7cd
-	crossFilteringBehavior: bothDirections
-	fromCardinality: one
-	fromColumn: PUBLICACIONES_MODELOS.ProyectoConcurso
-	toColumn: HISTORIAL_PUBLICACIONES_MODELOS.ProyectoConcurso
-
