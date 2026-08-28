@@ -51,7 +51,11 @@ table DimProyectoConcurso
 		mode: import
 		source =
 				let
-				    Activities = VENTAS_activities_docs_activities,
+																																												    Source = AutodeskConstructionCloud.Feed("United States"),
+																																												    Account = Source{[Key="17fefe95-3b69-4d44-bb94-0cbec2173aea"]}[Data],
+																																												    ProjectExtracts = Account{[Name="Project Extracts"]}[Data],
+																																												    Project = ProjectExtracts{[Key="5f587011-eb8e-4072-b4df-f16aee3915aa"]}[Data],
+																																												    Activities = Project{[Name="activities_docs_activities"]}[Data],
 																																												    Selected = Table.SelectColumns(
 																																												        Activities,
 																																												        {
@@ -104,6 +108,7 @@ table DimProyectoConcurso
 								        #table(
 								            type table [FolderKey = nullable text, ProyectoConcursoLocal = nullable text],
 								            {
+				                                {"urn:adsk.wipprod:fs.folder:co.3Xeck5N0SOeIdFZPfRJz_Q", "GRANJAS JESSY"},
 				                                {"urn:adsk.wipprod:fs.folder:co.__b-BZBqSLe8NwXWYRSW3A", "GAP_SJC_NORTE"},
 				                                {"urn:adsk.wipprod:fs.folder:co._09D7cSjQVe4v6fIEJbgcQ", "Z_PLANTILLA"},
 				                                {"urn:adsk.wipprod:fs.folder:co._9F-SQ4BTcO4_-kBhXtXTA", "BMW_ADECUACION"},
