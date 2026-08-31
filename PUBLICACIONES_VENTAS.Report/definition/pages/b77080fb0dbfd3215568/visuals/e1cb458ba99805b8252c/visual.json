@@ -1,0 +1,54 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "e1cb458ba99805b8252c",
+  "position": {
+    "x": 352.755905511811,
+    "y": 359.47506561679791,
+    "z": 4,
+    "height": 349.39632545931755,
+    "width": 248.60892388451444,
+    "tabOrder": 4
+  },
+  "visual": {
+    "visualType": "slicer",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ACTIVIDAD_DIARIA_MODELOS"
+                    }
+                  },
+                  "Property": "Equipo"
+                }
+              },
+              "queryRef": "ACTIVIDAD_DIARIA_MODELOS.Equipo",
+              "nativeQueryRef": "Equipo",
+              "active": true
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Basic'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

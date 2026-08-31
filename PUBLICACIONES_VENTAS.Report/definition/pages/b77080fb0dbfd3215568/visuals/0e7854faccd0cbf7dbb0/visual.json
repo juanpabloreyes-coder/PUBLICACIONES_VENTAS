@@ -1,0 +1,54 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "0e7854faccd0cbf7dbb0",
+  "position": {
+    "x": 10.078740157480315,
+    "y": 369.5538057742782,
+    "z": 3,
+    "height": 349.39632545931755,
+    "width": 258.68766404199476,
+    "tabOrder": 3
+  },
+  "visual": {
+    "visualType": "slicer",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ACTIVIDAD_DIARIA_MODELOS"
+                    }
+                  },
+                  "Property": "ProyectoConcurso"
+                }
+              },
+              "queryRef": "ACTIVIDAD_DIARIA_MODELOS.ProyectoConcurso",
+              "nativeQueryRef": "ProyectoConcurso",
+              "active": true
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Basic'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

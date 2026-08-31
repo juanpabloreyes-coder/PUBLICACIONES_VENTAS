@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "020851770bc97ecd4f7b",
+  "position": {
+    "x": 681.994750656168,
+    "y": 366.19422572178479,
+    "z": 5,
+    "height": 349.39632545931755,
+    "width": 262.04724409448818,
+    "tabOrder": 5
+  },
+  "visual": {
+    "visualType": "slicer",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ACTIVIDAD_DIARIA_MODELOS"
+                    }
+                  },
+                  "Property": "Responsable Modificación"
+                }
+              },
+              "queryRef": "ACTIVIDAD_DIARIA_MODELOS.Responsable Modificación",
+              "nativeQueryRef": "Responsable Modificación",
+              "active": true
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Basic'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {}
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

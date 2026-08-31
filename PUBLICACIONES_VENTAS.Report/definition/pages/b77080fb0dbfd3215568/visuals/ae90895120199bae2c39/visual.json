@@ -1,0 +1,55 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "ae90895120199bae2c39",
+  "position": {
+    "x": 10.078740157480315,
+    "y": 0,
+    "z": 0,
+    "height": 359.47506561679791,
+    "width": 215.01312335958005
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ACTIVIDAD_DIARIA_MODELOS"
+                    }
+                  },
+                  "Property": "META PUBLICACIONES"
+                }
+              },
+              "queryRef": "ACTIVIDAD_DIARIA_MODELOS.META PUBLICACIONES",
+              "nativeQueryRef": "META PUBLICACIONES"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "ACTIVIDAD_DIARIA_MODELOS"
+                  }
+                },
+                "Property": "META PUBLICACIONES"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

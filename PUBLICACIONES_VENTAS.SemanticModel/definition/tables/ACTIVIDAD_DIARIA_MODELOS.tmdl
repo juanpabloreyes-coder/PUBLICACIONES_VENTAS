@@ -1,6 +1,28 @@
 table ACTIVIDAD_DIARIA_MODELOS
 	lineageTag: fbcfc115-a29e-4816-a75e-5a9ac4b8de9d
 
+	measure 'META PUBLICACIONES' =
+			
+			SUM ( ACTIVIDAD_DIARIA_MODELOS[MetaPublicacion] )
+		formatString: 0
+		lineageTag: f1cdadb2-04d8-434e-9308-f7c381e3ece5
+
+	measure 'PUBLICACIONES CUMPLIDAS' =
+			
+			SUM ( ACTIVIDAD_DIARIA_MODELOS[PublicacionCumplida] )
+		formatString: 0
+		lineageTag: cb0d2c5a-f82a-4f56-8b2a-26bf9f0a1da0
+
+	measure '% PUBLICACIONES' =
+			
+			DIVIDE (
+			    [PUBLICACIONES CUMPLIDAS],
+			    [META PUBLICACIONES],
+			    0
+			)
+		formatString: 0.00\ %;-0.00\ %;0.00\ %
+		lineageTag: 4449c2f2-2bd5-4a64-ab65-080957ed1dd7
+
 	column ProyectoConcurso
 		dataType: string
 		lineageTag: 8bcf2dd2-fbda-4cc4-9298-b2fa51142600

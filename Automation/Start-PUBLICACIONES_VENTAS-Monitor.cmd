@@ -1,0 +1,4 @@
+@echo off
+cd /d "%~dp0"
+start "" powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "%~dp0Monitor-PUBLICACIONES_VENTAS.ps1"
+exit
