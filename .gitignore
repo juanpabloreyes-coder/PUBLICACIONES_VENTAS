@@ -2,3 +2,9 @@
 **/.pbi/cache.abf
 # Datos locales de sincronizacion Revit
 RevitSyncLog/
+
+# Estado temporal local de automatizacion
+Automation/automation.log
+Automation/monitor.pid
+Automation/sync-state.json
+Automation/*.signal
