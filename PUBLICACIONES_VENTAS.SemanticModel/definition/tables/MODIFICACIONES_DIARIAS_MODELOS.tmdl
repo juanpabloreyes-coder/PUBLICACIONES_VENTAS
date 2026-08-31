@@ -1,0 +1,108 @@
+table MODIFICACIONES_DIARIAS_MODELOS
+	lineageTag: 67a875eb-3e12-4beb-9fd7-f451061d845d
+
+	column ProjectLabel
+		dataType: string
+		lineageTag: 676bb26f-6a76-45fa-95f6-46ec1b147889
+		summarizeBy: none
+		sourceColumn: ProjectLabel
+
+		annotation SummarizationSetBy = Automatic
+
+	column ModelName
+		dataType: string
+		lineageTag: f3fa172b-b71f-4b0c-9de5-b14663b36cf1
+		summarizeBy: none
+		sourceColumn: ModelName
+
+		annotation SummarizationSetBy = Automatic
+
+	column ModelUrn
+		dataType: string
+		lineageTag: 764eb786-5037-4bba-8e42-58ecd4095055
+		summarizeBy: none
+		sourceColumn: ModelUrn
+
+		annotation SummarizationSetBy = Automatic
+
+	column RevitProjectId
+		dataType: string
+		lineageTag: 91ac3f96-ba4c-4544-9010-66cdb9d69af4
+		summarizeBy: none
+		sourceColumn: RevitProjectId
+
+		annotation SummarizationSetBy = Automatic
+
+	column SyncDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 34f78545-6f83-44c1-a0f1-aafa1a450ea4
+		summarizeBy: none
+		sourceColumn: SyncDate
+
+		variation Variation
+			isDefault
+			relationship: 557a752d-31a0-4048-8d26-a5e2245be4ef
+			defaultHierarchy: LocalDateTable_50f1d1cf-9797-413c-995a-26db8d31c05c.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Modificado
+		dataType: int64
+		formatString: 0
+		lineageTag: bf3cdc97-c0d9-42f9-a029-f95a487bd7b8
+		summarizeBy: sum
+		sourceColumn: Modificado
+
+		annotation SummarizationSetBy = Automatic
+
+	partition MODIFICACIONES_DIARIAS_MODELOS = m
+		mode: import
+		source =
+				let
+				    Source = HISTORIAL_MODIFICACIONES_MODELOS,
+				
+				    #"Columnas necesarias" = Table.SelectColumns(
+				        Source,
+				        {
+				            "ProjectLabel",
+				            "ModelName",
+				            "ModelUrn",
+				            "RevitProjectId",
+				            "SyncDate"
+				        }
+				    ),
+				
+				    #"Dias unicos" = Table.Distinct(
+				        #"Columnas necesarias",
+				        {
+				            "ProjectLabel",
+				            "ModelUrn",
+				            "SyncDate"
+				        }
+				    ),
+				
+				    #"Modificado agregado" = Table.AddColumn(
+				        #"Dias unicos",
+				        "Modificado",
+				        each 1,
+				        Int64.Type
+				    ),
+				
+				    #"Ordenado" = Table.Sort(
+				        #"Modificado agregado",
+				        {
+				            {"SyncDate", Order.Descending},
+				            {"ProjectLabel", Order.Ascending},
+				            {"ModelName", Order.Ascending}
+				        }
+				    )
+				in
+				    #"Ordenado"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

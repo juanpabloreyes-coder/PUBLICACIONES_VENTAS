@@ -1,0 +1,99 @@
+table PUBLICACIONES_DIARIAS_MODELOS
+	lineageTag: f55f029b-993f-4820-bf93-e73908e9d49d
+
+	column ProyectoConcurso
+		dataType: string
+		lineageTag: 0d9df25a-1641-4cc8-8140-1fc481827a77
+		summarizeBy: none
+		sourceColumn: ProyectoConcurso
+
+		annotation SummarizationSetBy = Automatic
+
+	column Modelo
+		dataType: string
+		lineageTag: e9f3d005-7776-4aec-8ecc-4fc01a92156d
+		summarizeBy: none
+		sourceColumn: Modelo
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Id de modelo'
+		dataType: string
+		lineageTag: cfae20b8-43dd-443c-8f83-c5c7bee5d068
+		summarizeBy: none
+		sourceColumn: Id de modelo
+
+		annotation SummarizationSetBy = Automatic
+
+	column Fecha
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: b227e31d-de24-4c57-9964-9caf098dce90
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		variation Variation
+			isDefault
+			relationship: 00eb6eed-6c53-438e-96a8-eaee3b7d79d8
+			defaultHierarchy: LocalDateTable_794d892e-64ee-49b2-b392-7c3a72e3edbc.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Publicado
+		dataType: int64
+		formatString: 0
+		lineageTag: 13136d14-7e44-4f33-a05d-9c6628c6adbc
+		summarizeBy: sum
+		sourceColumn: Publicado
+
+		annotation SummarizationSetBy = Automatic
+
+	partition PUBLICACIONES_DIARIAS_MODELOS = m
+		mode: import
+		source =
+				let
+				    Source = HISTORIAL_PUBLICACIONES_MODELOS,
+				
+				    #"Columnas necesarias" = Table.SelectColumns(
+				        Source,
+				        {
+				            "ProyectoConcurso",
+				            "Modelo",
+				            "Id de modelo",
+				            "Fecha"
+				        }
+				    ),
+				
+				    #"Publicaciones unicas por dia" = Table.Distinct(
+				        #"Columnas necesarias",
+				        {
+				            "ProyectoConcurso",
+				            "Id de modelo",
+				            "Fecha"
+				        }
+				    ),
+				
+				    #"Publicado agregado" = Table.AddColumn(
+				        #"Publicaciones unicas por dia",
+				        "Publicado",
+				        each 1,
+				        Int64.Type
+				    ),
+				
+				    #"Ordenado" = Table.Sort(
+				        #"Publicado agregado",
+				        {
+				            {"Fecha", Order.Descending},
+				            {"ProyectoConcurso", Order.Ascending},
+				            {"Modelo", Order.Ascending}
+				        }
+				    )
+				in
+				    #"Ordenado"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

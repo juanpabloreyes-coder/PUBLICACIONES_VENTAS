@@ -18,3 +18,32 @@ relationship ab3d9152-82ed-4069-ad1b-a49d3920b9cf
 	fromColumn: DimProyectoConcurso.UltimaActividad
 	toColumn: LocalDateTable_980a06ac-00e1-43d3-a475-a89a54a9d39e.Date
 
+relationship b036f2f5-c4b8-4a12-9436-c73fc0b379b6
+	joinOnDateBehavior: datePartOnly
+	fromColumn: HISTORIAL_MODIFICACIONES_MODELOS.SyncDate
+	toColumn: LocalDateTable_8ee2e506-ec4d-4711-b067-502b561f57bf.Date
+
+relationship 557a752d-31a0-4048-8d26-a5e2245be4ef
+	joinOnDateBehavior: datePartOnly
+	fromColumn: MODIFICACIONES_DIARIAS_MODELOS.SyncDate
+	toColumn: LocalDateTable_50f1d1cf-9797-413c-995a-26db8d31c05c.Date
+
+relationship 00eb6eed-6c53-438e-96a8-eaee3b7d79d8
+	joinOnDateBehavior: datePartOnly
+	fromColumn: PUBLICACIONES_DIARIAS_MODELOS.Fecha
+	toColumn: LocalDateTable_794d892e-64ee-49b2-b392-7c3a72e3edbc.Date
+
+relationship 5d20f19e-8f21-481e-bb97-74adf84fe260
+	joinOnDateBehavior: datePartOnly
+	fromColumn: ACTIVIDAD_DIARIA_MODELOS.Fecha
+	toColumn: LocalDateTable_c13cbb42-c749-4ec2-9532-78f6588bfdcf.Date
+
+relationship dd519bc6-af53-460a-b261-625576b422df
+	joinOnDateBehavior: datePartOnly
+	fromColumn: HISTORIAL_MODIFICACIONES_MODELOS.SyncCompletedAtLocal
+	toColumn: LocalDateTable_241ef107-fbc9-4ff4-be60-7fc0ccfde706.Date
+
+relationship AutoDetected_b9442a70-54b7-49be-bf14-880dbd73257d
+	fromColumn: PUBLICACIONES_DIARIAS_MODELOS.'Id de modelo'
+	toColumn: PUBLICACIONES_MODELOS.'Id de modelo'
+

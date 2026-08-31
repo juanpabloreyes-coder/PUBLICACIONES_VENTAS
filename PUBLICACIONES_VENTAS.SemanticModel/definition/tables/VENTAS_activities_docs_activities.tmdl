@@ -566,13 +566,29 @@ table VENTAS_activities_docs_activities
 		source =
 				let
 				    Source = AutodeskConstructionCloud.Feed("United States"),
-				    #"17fefe95-3b69-4d44-bb94-0cbec2173aea" = Source{[Key="17fefe95-3b69-4d44-bb94-0cbec2173aea"]}[Data],
-				    #"Project Extracts" = #"17fefe95-3b69-4d44-bb94-0cbec2173aea"{[Name="Project Extracts"]}[Data],
-				    #"5f587011-eb8e-4072-b4df-f16aee3915aa" = #"Project Extracts"{[Key="5f587011-eb8e-4072-b4df-f16aee3915aa"]}[Data],
-				    activities_docs_activities1 = #"5f587011-eb8e-4072-b4df-f16aee3915aa"{[Name="activities_docs_activities"]}[Data],
-				    #"Filtered Rows" = Table.SelectRows(activities_docs_activities1, each ([object_display_name] = "12_ARQ_NAVE.rvt") and ([object_id] = "urn:adsk.wipprod:dm.lineage:NIxiYtV1SqK1bxse88x5Ng"))
+				
+				    #"17fefe95-3b69-4d44-bb94-0cbec2173aea" =
+				        Source{
+				            [Key = "17fefe95-3b69-4d44-bb94-0cbec2173aea"]
+				        }[Data],
+				
+				    #"Project Extracts" =
+				        #"17fefe95-3b69-4d44-bb94-0cbec2173aea"{
+				            [Name = "Project Extracts"]
+				        }[Data],
+				
+				    #"5f587011-eb8e-4072-b4df-f16aee3915aa" =
+				        #"Project Extracts"{
+				            [Key = "5f587011-eb8e-4072-b4df-f16aee3915aa"]
+				        }[Data],
+				
+				    activities_docs_activities1 =
+				        #"5f587011-eb8e-4072-b4df-f16aee3915aa"{
+				            [Name = "activities_docs_activities"]
+				        }[Data]
+				
 				in
-				    #"Filtered Rows"
+				    activities_docs_activities1
 
 	annotation PBI_NavigationStepName = Navigation
 

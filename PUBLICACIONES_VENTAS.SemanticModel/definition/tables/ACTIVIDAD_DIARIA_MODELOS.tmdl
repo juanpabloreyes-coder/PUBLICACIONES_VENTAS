@@ -1,0 +1,1100 @@
+table ACTIVIDAD_DIARIA_MODELOS
+	lineageTag: fbcfc115-a29e-4816-a75e-5a9ac4b8de9d
+
+	column ProyectoConcurso
+		dataType: string
+		lineageTag: 8bcf2dd2-fbda-4cc4-9298-b2fa51142600
+		summarizeBy: none
+		sourceColumn: ProyectoConcurso
+
+		annotation SummarizationSetBy = Automatic
+
+	column Modelo
+		dataType: string
+		lineageTag: b2281aa3-3e31-45e1-a100-6c0f73c3a596
+		summarizeBy: none
+		sourceColumn: Modelo
+
+		annotation SummarizationSetBy = Automatic
+
+	column Disciplina
+		dataType: string
+		lineageTag: 111acff4-044b-4a0d-8cf2-92b2d5fae1be
+		summarizeBy: none
+		sourceColumn: Disciplina
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Responsable Modificación'
+		dataType: string
+		lineageTag: bae19d31-94ac-4f76-956c-68a7e7a00802
+		summarizeBy: none
+		sourceColumn: Responsable Modificación
+
+		annotation SummarizationSetBy = Automatic
+
+	column Equipo
+		dataType: string
+		lineageTag: bf08d6aa-e3fe-4ed6-be96-cb04212af8f9
+		summarizeBy: none
+		sourceColumn: Equipo
+
+		annotation SummarizationSetBy = Automatic
+
+	column IdModelo
+		dataType: string
+		lineageTag: f635446a-4967-4c0e-bd93-e175cbca7503
+		summarizeBy: none
+		sourceColumn: IdModelo
+
+		annotation SummarizationSetBy = Automatic
+
+	column Fecha
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: e2c53134-aed8-4110-8174-5848b12bdafc
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		variation Variation
+			isDefault
+			relationship: 5d20f19e-8f21-481e-bb97-74adf84fe260
+			defaultHierarchy: LocalDateTable_c13cbb42-c749-4ec2-9532-78f6588bfdcf.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Modificado
+		dataType: double
+		lineageTag: 3ee666f6-9f3c-43bc-9c40-0fccd41fd06b
+		summarizeBy: sum
+		sourceColumn: Modificado
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Publicado
+		dataType: double
+		lineageTag: 1b61baed-92f6-464d-95ef-c153aabb0137
+		summarizeBy: sum
+		sourceColumn: Publicado
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column EstadoDia
+		dataType: string
+		lineageTag: 4efb5004-88ae-4028-87e9-7528188cedc7
+		summarizeBy: none
+		sourceColumn: EstadoDia
+
+		annotation SummarizationSetBy = Automatic
+
+	column MetaPublicacion
+		dataType: int64
+		formatString: 0
+		lineageTag: b9262b53-39b8-475f-a208-8582282e5590
+		summarizeBy: sum
+		sourceColumn: MetaPublicacion
+
+		annotation SummarizationSetBy = Automatic
+
+	column PublicacionCumplida
+		dataType: int64
+		formatString: 0
+		lineageTag: ca22cbb1-68fc-4e10-a40f-2f8179121605
+		summarizeBy: sum
+		sourceColumn: PublicacionCumplida
+
+		annotation SummarizationSetBy = Automatic
+
+	column LlaveCruce
+		dataType: string
+		lineageTag: 88bdd097-d48e-4abf-a19e-7ca17a970799
+		summarizeBy: none
+		sourceColumn: LlaveCruce
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ACTIVIDAD_DIARIA_MODELOS = m
+		mode: import
+		source =
+				let
+				    // ============================================================
+				    // 1. FUENTES
+				    // ============================================================
+				    Modificaciones = MODIFICACIONES_DIARIAS_MODELOS,
+				    Publicaciones = PUBLICACIONES_DIARIAS_MODELOS,
+				
+				
+				    // ============================================================
+				    // 2. NORMALIZAR NOMBRE DE MODELO
+				    //
+				    // 11_ARQ_CONJUNTO.rvt -> 11_ARQ_CONJUNTO
+				    // ============================================================
+				    NormalizarModelo = (valor as any) as text =>
+				        let
+				            TextoBase =
+				                if valor = null then
+				                    ""
+				                else
+				                    Text.Upper(
+				                        Text.Trim(
+				                            Text.Clean(
+				                                Text.From(valor)
+				                            )
+				                        )
+				                    ),
+				
+				            SinExtension =
+				                if Text.EndsWith(
+				                    TextoBase,
+				                    ".RVT",
+				                    Comparer.OrdinalIgnoreCase
+				                )
+				                then
+				                    Text.Start(
+				                        TextoBase,
+				                        Text.Length(TextoBase) - 4
+				                    )
+				                else
+				                    TextoBase
+				        in
+				            SinExtension,
+				
+				
+				    // ============================================================
+				    // 3. NORMALIZAR NOMBRE DE PERSONA
+				    //
+				    // Esta lógica debe ser compatible con EquiposIntegrantesVENTAS.
+				    // Conserva espacios.
+				    // Elimina diferencias por mayúsculas, acentos y caracteres.
+				    // ============================================================
+				    NormalizarPersona = (valor as any) as text =>
+				        let
+				            Limpio =
+				                if valor = null then
+				                    ""
+				                else
+				                    try
+				                        Text.Trim(
+				                            Text.Clean(
+				                                Text.From(valor)
+				                            )
+				                        )
+				                    otherwise
+				                        "",
+				
+				            Mayusculas =
+				                Text.Upper(Limpio),
+				
+				            SinDiacriticos =
+				                List.Accumulate(
+				                    {
+				                        {"Á", "A"},
+				                        {"É", "E"},
+				                        {"Í", "I"},
+				                        {"Ó", "O"},
+				                        {"Ú", "U"},
+				                        {"Ü", "U"},
+				                        {"Ñ", "N"}
+				                    },
+				                    Mayusculas,
+				                    (estado, par) =>
+				                        Text.Replace(
+				                            estado,
+				                            par{0},
+				                            par{1}
+				                        )
+				                ),
+				
+				            PuntuacionComoEspacio =
+				                List.Accumulate(
+				                    {
+				                        ".",
+				                        ",",
+				                        ";",
+				                        ":",
+				                        "-",
+				                        "_",
+				                        "/",
+				                        "\"
+				                    },
+				                    SinDiacriticos,
+				                    (estado, caracter) =>
+				                        Text.Replace(
+				                            estado,
+				                            caracter,
+				                            " "
+				                        )
+				                ),
+				
+				            Palabras =
+				                List.Select(
+				                    Text.Split(
+				                        PuntuacionComoEspacio,
+				                        " "
+				                    ),
+				                    each _ <> ""
+				                ),
+				
+				            Resultado =
+				                Text.Combine(
+				                    Palabras,
+				                    " "
+				                )
+				        in
+				            Resultado,
+				
+				
+				    // ============================================================
+				    // 4. CLAVE COMPACTA DE PERSONA
+				    //
+				    // Sirve para comparar nombres aunque Revit entregue:
+				    //
+				    // JUANPABLOREYESMEDINA
+				    // Juan Pablo Reyes Medina
+				    //
+				    // ============================================================
+				    CompactarPersona = (valor as any) as text =>
+				        Text.Remove(
+				            NormalizarPersona(valor),
+				            {
+				                " ",
+				                ".",
+				                ",",
+				                "-",
+				                "_"
+				            }
+				        ),
+				
+				
+				    // ============================================================
+				    // 5. PREPARAR MODIFICACIONES
+				    //
+				    // GRANJAS_JESSY -> GRANJAS JESSY
+				    // GONVAUTO_F2   -> GONVAUTO F2
+				    // ============================================================
+				    ModConProyecto = Table.AddColumn(
+				        Modificaciones,
+				        "ProyectoConcurso",
+				        each
+				            if [ProjectLabel] = null then
+				                null
+				            else
+				                Text.Replace(
+				                    Text.Trim(
+				                        Text.From([ProjectLabel])
+				                    ),
+				                    "_",
+				                    " "
+				                ),
+				        type text
+				    ),
+				
+				    ModConModeloKey = Table.AddColumn(
+				        ModConProyecto,
+				        "ModeloKey",
+				        each
+				            NormalizarModelo(
+				                [ModelName]
+				            ),
+				        type text
+				    ),
+				
+				    ModPrep = Table.RenameColumns(
+				        ModConModeloKey,
+				        {
+				            {"ModelUrn", "IdModelo"},
+				            {"SyncDate", "Fecha"},
+				            {"ModelName", "ModeloModificacion"}
+				        },
+				        MissingField.Ignore
+				    ),
+				
+				    ModFinal = Table.SelectColumns(
+				        ModPrep,
+				        {
+				            "ProyectoConcurso",
+				            "ModeloModificacion",
+				            "ModeloKey",
+				            "IdModelo",
+				            "Fecha",
+				            "Modificado"
+				        },
+				        MissingField.UseNull
+				    ),
+				
+				
+				    // ============================================================
+				    // 6. PREPARAR PUBLICACIONES
+				    // ============================================================
+				    PubConModeloKey = Table.AddColumn(
+				        Publicaciones,
+				        "ModeloKey",
+				        each
+				            NormalizarModelo(
+				                [Modelo]
+				            ),
+				        type text
+				    ),
+				
+				    PubPrep = Table.RenameColumns(
+				        PubConModeloKey,
+				        {
+				            {"Id de modelo", "IdModelo"},
+				            {"Modelo", "ModeloPublicacion"}
+				        },
+				        MissingField.Ignore
+				    ),
+				
+				    PubFinal = Table.SelectColumns(
+				        PubPrep,
+				        {
+				            "ProyectoConcurso",
+				            "ModeloPublicacion",
+				            "ModeloKey",
+				            "IdModelo",
+				            "Fecha",
+				            "Publicado"
+				        },
+				        MissingField.UseNull
+				    ),
+				
+				
+				    // ============================================================
+				    // 7. LLAVE DEL KPI
+				    //
+				    // Proyecto + Modelo + Fecha
+				    //
+				    // NO depende del URN porque los históricos manuales
+				    // pueden no tenerlo.
+				    // ============================================================
+				    ModConLlave = Table.AddColumn(
+				        ModFinal,
+				        "LlaveCruce",
+				        each
+				            Text.Upper(
+				                Text.Trim(
+				                    Text.From([ProyectoConcurso])
+				                )
+				            )
+				            & "|"
+				            & [ModeloKey]
+				            & "|"
+				            & Date.ToText(
+				                [Fecha],
+				                "yyyy-MM-dd"
+				            ),
+				        type text
+				    ),
+				
+				    PubConLlave = Table.AddColumn(
+				        PubFinal,
+				        "LlaveCruce",
+				        each
+				            Text.Upper(
+				                Text.Trim(
+				                    Text.From([ProyectoConcurso])
+				                )
+				            )
+				            & "|"
+				            & [ModeloKey]
+				            & "|"
+				            & Date.ToText(
+				                [Fecha],
+				                "yyyy-MM-dd"
+				            ),
+				        type text
+				    ),
+				
+				
+				    // ============================================================
+				    // 8. UNIVERSO MODELO + FECHA
+				    // ============================================================
+				    LlavesMod = Table.SelectColumns(
+				        ModConLlave,
+				        {
+				            "LlaveCruce",
+				            "ProyectoConcurso",
+				            "ModeloKey",
+				            "IdModelo",
+				            "Fecha"
+				        }
+				    ),
+				
+				    LlavesPub = Table.SelectColumns(
+				        PubConLlave,
+				        {
+				            "LlaveCruce",
+				            "ProyectoConcurso",
+				            "ModeloKey",
+				            "IdModelo",
+				            "Fecha"
+				        }
+				    ),
+				
+				    TodasLasLlaves = Table.Distinct(
+				        Table.Combine(
+				            {
+				                LlavesMod,
+				                LlavesPub
+				            }
+				        ),
+				        {
+				            "LlaveCruce"
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 9. AGREGAR MODIFICACIONES
+				    // ============================================================
+				    JoinMod = Table.NestedJoin(
+				        TodasLasLlaves,
+				        {"LlaveCruce"},
+				        ModConLlave,
+				        {"LlaveCruce"},
+				        "__Mod",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    ExpandMod = Table.ExpandTableColumn(
+				        JoinMod,
+				        "__Mod",
+				        {
+				            "ModeloModificacion",
+				            "IdModelo",
+				            "Modificado"
+				        },
+				        {
+				            "ModeloModificacion",
+				            "IdModeloModificacion",
+				            "Modificado"
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 10. AGREGAR PUBLICACIONES
+				    // ============================================================
+				    JoinPub = Table.NestedJoin(
+				        ExpandMod,
+				        {"LlaveCruce"},
+				        PubConLlave,
+				        {"LlaveCruce"},
+				        "__Pub",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    ExpandPub = Table.ExpandTableColumn(
+				        JoinPub,
+				        "__Pub",
+				        {
+				            "ModeloPublicacion",
+				            "IdModelo",
+				            "Publicado"
+				        },
+				        {
+				            "ModeloPublicacion",
+				            "IdModeloPublicacion",
+				            "Publicado"
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 11. RESOLVER NOMBRE DEL MODELO
+				    // ============================================================
+				    ModeloAgregado = Table.AddColumn(
+				        ExpandPub,
+				        "Modelo",
+				        each
+				            if [ModeloPublicacion] <> null
+				                and Text.Trim(
+				                    Text.From(
+				                        [ModeloPublicacion]
+				                    )
+				                ) <> ""
+				            then
+				                [ModeloPublicacion]
+				            else
+				                [ModeloModificacion],
+				        type text
+				    ),
+				
+				
+				    // ============================================================
+				    // 12. RESOLVER ID DEL MODELO
+				    // ============================================================
+				    IdModeloAgregado = Table.AddColumn(
+				        ModeloAgregado,
+				        "IdModeloFinal",
+				        each
+				            if [IdModeloPublicacion] <> null
+				                and Text.Trim(
+				                    Text.From(
+				                        [IdModeloPublicacion]
+				                    )
+				                ) <> ""
+				            then
+				                [IdModeloPublicacion]
+				            else
+				                [IdModeloModificacion],
+				        type text
+				    ),
+				
+				
+				    // ============================================================
+				    // 13. NULL -> 0
+				    // ============================================================
+				    Ceros = Table.ReplaceValue(
+				        IdModeloAgregado,
+				        null,
+				        0,
+				        Replacer.ReplaceValue,
+				        {
+				            "Modificado",
+				            "Publicado"
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 14. ESTADO DEL DIA
+				    // ============================================================
+				    Estado = Table.AddColumn(
+				        Ceros,
+				        "EstadoDia",
+				        each
+				            if [Modificado] = 1
+				                and [Publicado] = 1
+				            then
+				                "CUMPLE"
+				
+				            else if [Modificado] = 1
+				                and [Publicado] = 0
+				            then
+				                "INCUMPLE"
+				
+				            else if [Modificado] = 0
+				                and [Publicado] = 1
+				            then
+				                "PUBLICACION ADICIONAL"
+				
+				            else
+				                "INACTIVO",
+				        type text
+				    ),
+				
+				
+				    // ============================================================
+				    // 15. META DINAMICA
+				    // ============================================================
+				    Meta = Table.AddColumn(
+				        Estado,
+				        "MetaPublicacion",
+				        each
+				            if [Modificado] = 1
+				            then 1
+				            else 0,
+				        Int64.Type
+				    ),
+				
+				
+				    // ============================================================
+				    // 16. PUBLICACION CUMPLIDA
+				    // ============================================================
+				    PublicacionCumplida = Table.AddColumn(
+				        Meta,
+				        "PublicacionCumplida",
+				        each
+				            if [Modificado] = 1
+				                and [Publicado] = 1
+				            then 1
+				            else 0,
+				        Int64.Type
+				    ),
+				
+				
+				    // ============================================================
+				    // 17. DISCIPLINA
+				    // ============================================================
+				    HistorialDisciplina = Table.SelectColumns(
+				        HISTORIAL_PUBLICACIONES_MODELOS,
+				        {
+				            "ProyectoConcurso",
+				            "Modelo",
+				            "Disciplina"
+				        },
+				        MissingField.UseNull
+				    ),
+				
+				    HistorialDisciplinaConKey = Table.AddColumn(
+				        HistorialDisciplina,
+				        "ModeloKey",
+				        each
+				            NormalizarModelo(
+				                [Modelo]
+				            ),
+				        type text
+				    ),
+				
+				    DisciplinaUnica = Table.Distinct(
+				        Table.SelectColumns(
+				            HistorialDisciplinaConKey,
+				            {
+				                "ProyectoConcurso",
+				                "ModeloKey",
+				                "Disciplina"
+				            }
+				        ),
+				        {
+				            "ProyectoConcurso",
+				            "ModeloKey"
+				        }
+				    ),
+				
+				    ActividadConModeloKey = Table.AddColumn(
+				        PublicacionCumplida,
+				        "ModeloKeyFinal",
+				        each
+				            NormalizarModelo(
+				                [Modelo]
+				            ),
+				        type text
+				    ),
+				
+				    JoinDisciplina = Table.NestedJoin(
+				        ActividadConModeloKey,
+				        {
+				            "ProyectoConcurso",
+				            "ModeloKeyFinal"
+				        },
+				        DisciplinaUnica,
+				        {
+				            "ProyectoConcurso",
+				            "ModeloKey"
+				        },
+				        "__Disciplina",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    ExpandDisciplina = Table.ExpandTableColumn(
+				        JoinDisciplina,
+				        "__Disciplina",
+				        {
+				            "Disciplina"
+				        },
+				        {
+				            "Disciplina"
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 18. RESPONSABLE DETECTADO EN REVIT
+				    //
+				    // Para cada Modelo + Día se toma el usuario de la última
+				    // sincronización.
+				    // ============================================================
+				    ModHistOrdenado = Table.Sort(
+				        HISTORIAL_MODIFICACIONES_MODELOS,
+				        {
+				            {
+				                "SyncCompletedAtLocal",
+				                Order.Descending
+				            }
+				        }
+				    ),
+				
+				    ModHistConProyecto = Table.AddColumn(
+				        ModHistOrdenado,
+				        "ProyectoConcurso",
+				        each
+				            if [ProjectLabel] = null then
+				                null
+				            else
+				                Text.Replace(
+				                    Text.Trim(
+				                        Text.From(
+				                            [ProjectLabel]
+				                        )
+				                    ),
+				                    "_",
+				                    " "
+				                ),
+				        type text
+				    ),
+				
+				    ModHistConModeloKey = Table.AddColumn(
+				        ModHistConProyecto,
+				        "ModeloKey",
+				        each
+				            NormalizarModelo(
+				                [ModelName]
+				            ),
+				        type text
+				    ),
+				
+				    ModHistConLlave = Table.AddColumn(
+				        ModHistConModeloKey,
+				        "LlaveCruce",
+				        each
+				            Text.Upper(
+				                Text.Trim(
+				                    Text.From(
+				                        [ProyectoConcurso]
+				                    )
+				                )
+				            )
+				            & "|"
+				            & [ModeloKey]
+				            & "|"
+				            & Date.ToText(
+				                [SyncDate],
+				                "yyyy-MM-dd"
+				            ),
+				        type text
+				    ),
+				
+				    ResponsableRevitPorDia = Table.Group(
+				        ModHistConLlave,
+				        {
+				            "LlaveCruce"
+				        },
+				        {
+				            {
+				                "ResponsableRevit",
+				                each
+				                    let
+				                        TablaDia = Table.Sort(
+				                            _,
+				                            {
+				                                {
+				                                    "SyncCompletedAtLocal",
+				                                    Order.Descending
+				                                }
+				                            }
+				                        )
+				                    in
+				                        try
+				                            TablaDia{0}[RevitUser]
+				                        otherwise
+				                            null,
+				                type nullable text
+				            }
+				        }
+				    ),
+				
+				    JoinResponsableRevit = Table.NestedJoin(
+				        ExpandDisciplina,
+				        {
+				            "LlaveCruce"
+				        },
+				        ResponsableRevitPorDia,
+				        {
+				            "LlaveCruce"
+				        },
+				        "__ResponsableRevit",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    ExpandResponsableRevit = Table.ExpandTableColumn(
+				        JoinResponsableRevit,
+				        "__ResponsableRevit",
+				        {
+				            "ResponsableRevit"
+				        },
+				        {
+				            "ResponsableRevit"
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 19. PREPARAR LISTADO DEFINITIVO DE INTEGRANTES
+				    //
+				    // EquiposIntegrantesVENTAS es la fuente maestra.
+				    // ============================================================
+				    ListaIntegrantesBase = Table.SelectColumns(
+				        EquiposIntegrantesVENTAS,
+				        {
+				            "Integrante",
+				            "Equipo"
+				        },
+				        MissingField.UseNull
+				    ),
+				
+				    ListaIntegrantesConKey = Table.AddColumn(
+				        ListaIntegrantesBase,
+				        "PersonaKey",
+				        each
+				            NormalizarPersona(
+				                [Integrante]
+				            ),
+				        type text
+				    ),
+				
+				    ListaIntegrantesConKeyCompacta = Table.AddColumn(
+				        ListaIntegrantesConKey,
+				        "PersonaKeyCompacta",
+				        each
+				            CompactarPersona(
+				                [Integrante]
+				            ),
+				        type text
+				    ),
+				
+				    ListaIntegrantesDefinitiva = Table.Distinct(
+				        ListaIntegrantesConKeyCompacta,
+				        {
+				            "PersonaKeyCompacta"
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 20. ALIAS CONOCIDOS DEL ADD-IN / REVIT
+				    //
+				    // Sólo para casos en que Revit no entregue el nombre completo.
+				    // El nombre de destino debe ser el del listado definitivo.
+				    // ============================================================
+				    AliasPersonas = #table(
+				        type table [
+				            AliasKey = text,
+				            IntegranteDestino = text
+				        ],
+				        {
+				            {
+				                "JUANPABLOREYESGCP",
+				                "JUAN PABLO REYES MEDINA"
+				            }
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 21. CLAVES DEL USUARIO DETECTADO EN REVIT
+				    // ============================================================
+				    ActividadConPersonaKey = Table.AddColumn(
+				        ExpandResponsableRevit,
+				        "PersonaKeyRevit",
+				        each
+				            NormalizarPersona(
+				                [ResponsableRevit]
+				            ),
+				        type text
+				    ),
+				
+				    ActividadConPersonaCompacta = Table.AddColumn(
+				        ActividadConPersonaKey,
+				        "PersonaKeyCompactaRevit",
+				        each
+				            CompactarPersona(
+				                [ResponsableRevit]
+				            ),
+				        type text
+				    ),
+				
+				
+				    // ============================================================
+				    // 22. BUSCAR ALIAS
+				    // ============================================================
+				    JoinAlias = Table.NestedJoin(
+				        ActividadConPersonaCompacta,
+				        {
+				            "PersonaKeyCompactaRevit"
+				        },
+				        AliasPersonas,
+				        {
+				            "AliasKey"
+				        },
+				        "__Alias",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    ExpandAlias = Table.ExpandTableColumn(
+				        JoinAlias,
+				        "__Alias",
+				        {
+				            "IntegranteDestino"
+				        },
+				        {
+				            "IntegranteDestino"
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 23. DEFINIR CLAVE QUE SE BUSCARA EN EL LISTADO
+				    //
+				    // Si existe alias:
+				    // usa el nombre destino.
+				    //
+				    // Si no:
+				    // usa directamente el nombre recibido de Revit.
+				    // ============================================================
+				    PersonaBusqueda = Table.AddColumn(
+				        ExpandAlias,
+				        "PersonaKeyBusqueda",
+				        each
+				            if [IntegranteDestino] <> null
+				                and Text.Trim(
+				                    Text.From(
+				                        [IntegranteDestino]
+				                    )
+				                ) <> ""
+				            then
+				                CompactarPersona(
+				                    [IntegranteDestino]
+				                )
+				            else
+				                [PersonaKeyCompactaRevit],
+				        type text
+				    ),
+				
+				
+				    // ============================================================
+				    // 24. CRUCE DEFINITIVO CON EL LISTADO
+				    // ============================================================
+				    JoinIntegrante = Table.NestedJoin(
+				        PersonaBusqueda,
+				        {
+				            "PersonaKeyBusqueda"
+				        },
+				        ListaIntegrantesDefinitiva,
+				        {
+				            "PersonaKeyCompacta"
+				        },
+				        "__Integrante",
+				        JoinKind.LeftOuter
+				    ),
+				
+				    ExpandIntegrante = Table.ExpandTableColumn(
+				        JoinIntegrante,
+				        "__Integrante",
+				        {
+				            "Integrante",
+				            "Equipo"
+				        },
+				        {
+				            "IntegranteDefinitivo",
+				            "EquipoDefinitivo"
+				        }
+				    ),
+				
+				
+				    // ============================================================
+				    // 25. RESPONSABLE FINAL
+				    //
+				    // Prioridad:
+				    //
+				    // 1. Nombre del listado oficial
+				    // 2. Nombre proveniente de Revit
+				    // ============================================================
+				    ResponsableFinal = Table.AddColumn(
+				        ExpandIntegrante,
+				        "Responsable Modificación",
+				        each
+				            if [IntegranteDefinitivo] <> null
+				                and Text.Trim(
+				                    Text.From(
+				                        [IntegranteDefinitivo]
+				                    )
+				                ) <> ""
+				            then
+				                [IntegranteDefinitivo]
+				            else
+				                [ResponsableRevit],
+				        type text
+				    ),
+				
+				
+				    // ============================================================
+				    // 26. EQUIPO FINAL
+				    // ============================================================
+				    EquipoFinal = Table.AddColumn(
+				        ResponsableFinal,
+				        "Equipo",
+				        each
+				            if [EquipoDefinitivo] <> null
+				                and Text.Trim(
+				                    Text.From(
+				                        [EquipoDefinitivo]
+				                    )
+				                ) <> ""
+				            then
+				                [EquipoDefinitivo]
+				            else
+				                "SIN EQUIPO",
+				        type text
+				    ),
+				
+				
+				    // ============================================================
+				    // 27. COLUMNAS FINALES
+				    // ============================================================
+				    ColumnasFinales = Table.SelectColumns(
+				        EquipoFinal,
+				        {
+				            "ProyectoConcurso",
+				            "Modelo",
+				            "Disciplina",
+				            "Responsable Modificación",
+				            "Equipo",
+				            "IdModeloFinal",
+				            "Fecha",
+				            "Modificado",
+				            "Publicado",
+				            "EstadoDia",
+				            "MetaPublicacion",
+				            "PublicacionCumplida",
+				            "LlaveCruce"
+				        },
+				        MissingField.UseNull
+				    ),
+				
+				    IdModeloRenombrado = Table.RenameColumns(
+				        ColumnasFinales,
+				        {
+				            {
+				                "IdModeloFinal",
+				                "IdModelo"
+				            }
+				        },
+				        MissingField.Ignore
+				    ),
+				
+				
+				    // ============================================================
+				    // 28. ORDEN FINAL
+				    // ============================================================
+				    Ordenado = Table.Sort(
+				        IdModeloRenombrado,
+				        {
+				            {
+				                "Fecha",
+				                Order.Descending
+				            },
+				            {
+				                "ProyectoConcurso",
+				                Order.Ascending
+				            },
+				            {
+				                "Modelo",
+				                Order.Ascending
+				            }
+				        }
+				    )
+				
+				in
+				    Ordenado
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,184 @@
+table HISTORIAL_MODIFICACIONES_MODELOS
+	lineageTag: 64a0320b-a053-4337-8bd9-dc302203b950
+
+	column ModelName
+		dataType: string
+		lineageTag: fb2c2de7-1f79-41ea-90e2-7d188d5ca425
+		summarizeBy: none
+		sourceColumn: ModelName
+
+		annotation SummarizationSetBy = Automatic
+
+	column ModelUrn
+		dataType: string
+		lineageTag: 45eb84d2-6dfe-4f91-855f-5249b9384a46
+		summarizeBy: none
+		sourceColumn: ModelUrn
+
+		annotation SummarizationSetBy = Automatic
+
+	column RevitProjectId
+		dataType: string
+		lineageTag: dce82b5f-d7f7-40f7-b5e8-125293ca1beb
+		summarizeBy: none
+		sourceColumn: RevitProjectId
+
+		annotation SummarizationSetBy = Automatic
+
+	column SyncDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: bf67a053-9e18-45f4-9d02-ec2d59d8873f
+		summarizeBy: none
+		sourceColumn: SyncDate
+
+		variation Variation
+			isDefault
+			relationship: b036f2f5-c4b8-4a12-9436-c73fc0b379b6
+			defaultHierarchy: LocalDateTable_8ee2e506-ec4d-4711-b067-502b561f57bf.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ProjectLabel
+		dataType: string
+		lineageTag: 5a5ebedc-8947-4e07-8d24-56de2bd04e79
+		summarizeBy: none
+		sourceColumn: ProjectLabel
+
+		annotation SummarizationSetBy = Automatic
+
+	column RevitHubId
+		dataType: string
+		lineageTag: 0076f4c8-408b-4880-8543-b3bb9bc39c54
+		summarizeBy: none
+		sourceColumn: RevitHubId
+
+		annotation SummarizationSetBy = Automatic
+
+	column SyncCompletedAtLocal
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: ddab3441-68cf-4aaf-80b2-11c1db258778
+		summarizeBy: none
+		sourceColumn: SyncCompletedAtLocal
+
+		variation Variation
+			isDefault
+			relationship: dd519bc6-af53-460a-b261-625576b422df
+			defaultHierarchy: LocalDateTable_241ef107-fbc9-4ff4-be60-7fc0ccfde706.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column RevitUser
+		dataType: string
+		lineageTag: fe3e6036-6b16-424e-9368-1be69c00a464
+		summarizeBy: none
+		sourceColumn: RevitUser
+
+		annotation SummarizationSetBy = Automatic
+
+	column WindowsUser
+		dataType: string
+		lineageTag: 396120c7-81f9-4044-ba6b-3ede8cec1366
+		summarizeBy: none
+		sourceColumn: WindowsUser
+
+		annotation SummarizationSetBy = Automatic
+
+	column MachineName
+		dataType: string
+		lineageTag: c87f3dfd-6835-403b-ae44-405bf17e667a
+		summarizeBy: none
+		sourceColumn: MachineName
+
+		annotation SummarizationSetBy = Automatic
+
+	column RevitVersion
+		dataType: string
+		lineageTag: a42af50a-850b-4c67-8587-a96692080365
+		summarizeBy: none
+		sourceColumn: RevitVersion
+
+		annotation SummarizationSetBy = Automatic
+
+	column SourceType
+		dataType: string
+		lineageTag: 226fc95f-2f0d-4d39-8c67-2f0776aa1a02
+		summarizeBy: none
+		sourceColumn: SourceType
+
+		annotation SummarizationSetBy = Automatic
+
+	column SyncStatus
+		dataType: string
+		lineageTag: b9a10347-f8ad-4e4b-b454-9cffc6f0ec4c
+		summarizeBy: none
+		sourceColumn: SyncStatus
+
+		annotation SummarizationSetBy = Automatic
+
+	partition HISTORIAL_MODIFICACIONES_MODELOS = m
+		mode: import
+		source =
+				let
+				    Source = Folder.Files("C:\\Users\\Usuario\\DC\\ACCDocs\\GCPEASA\\GCP_TRANSFORMACIÓN_DIGITAL\\Project Files\\01_IMPLEMENTACIÓN_BIM\\0112_SQDCM\\011211_VENTAS\\PUBLICACIONES_VENTAS\\RevitSyncLog"),
+				    CsvOnly = Table.SelectRows(Source, each [Extension] = ".csv"),
+				    Tables = Table.AddColumn(CsvOnly, "Rows", each Table.PromoteHeaders(Csv.Document([Content], [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]), [PromoteAllScalars = true])),
+				    Combined = Table.Combine(Tables[Rows]),
+				    Typed = Table.TransformColumnTypes(Combined, {
+				        {"SourceType", type text}, {"ProjectLabel", type text}, {"ModelName", type text},
+				        {"ModelUrn", type text}, {"RevitProjectId", type text}, {"RevitHubId", type text},
+				        {"SyncCompletedAtLocal", type datetimezone}, {"SyncStatus", type text},
+				        {"RevitUser", type text}, {"WindowsUser", type text}, {"MachineName", type text}, {"RevitVersion", type text}
+				    }),
+				    ModelMap = #table(type table [ModelUrn = text, MappedProjectLabel = text], {
+				        {"urn:adsk.wipprod:dm.lineage:mdE228VySGGVeNVpaZvp4Q", "GRANJAS_JESSY"},
+				        {"urn:adsk.wipprod:dm.lineage:7tL6h3rcQy20EDqgD_HTYQ", "GRANJAS_JESSY"},
+				        {"urn:adsk.wipprod:dm.lineage:wmoahuNmTuOoOAXwG4xaiQ", "GONVAUTO_F2"},
+				        {"urn:adsk.wipprod:dm.lineage:NIxiYtV1SqK1bxse88x5Ng", "GONVAUTO_F2"}
+				    }),
+				    JoinedMap = Table.NestedJoin(Typed, {"ModelUrn"}, ModelMap, {"ModelUrn"}, "ProjectMap", JoinKind.LeftOuter),
+				    ExpandedMap = Table.ExpandTableColumn(JoinedMap, "ProjectMap", {"MappedProjectLabel"}, {"MappedProjectLabel"}),
+				    CorrectedProject = Table.AddColumn(ExpandedMap, "ProjectLabelCorrected", each if [MappedProjectLabel] <> null then [MappedProjectLabel] else [ProjectLabel], type text),
+				    RemovedOldProject = Table.RemoveColumns(CorrectedProject, {"ProjectLabel", "MappedProjectLabel"}),
+				    WithProject = Table.RenameColumns(RemovedOldProject, {{"ProjectLabelCorrected", "ProjectLabel"}}),
+				    SuccessfulOnly = Table.SelectRows(
+				    WithProject,
+				    each [SyncStatus] = "Succeeded"
+				),
+				
+				WithDate = Table.AddColumn(
+				    SuccessfulOnly,
+				    "SyncDate",
+				    each Date.From([SyncCompletedAtLocal]),
+				    type date
+				),
+				
+				Final = Table.SelectColumns(
+				    WithDate,
+				    {
+				        "ProjectLabel",
+				        "ModelName",
+				        "ModelUrn",
+				        "RevitProjectId",
+				        "RevitHubId",
+				        "SyncCompletedAtLocal",
+				        "SyncDate",
+				        "RevitUser",
+				        "WindowsUser",
+				        "MachineName",
+				        "RevitVersion",
+				        "SourceType",
+				        "SyncStatus"
+				    }
+				)
+				
+				in
+				    Final
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

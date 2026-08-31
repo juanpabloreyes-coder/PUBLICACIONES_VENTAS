@@ -9,7 +9,7 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 1
 
-annotation PBI_QueryOrder = ["VENTAS_activities_docs_activities","HISTORIAL_PUBLICACIONES_MODELOS","PUBLICACIONES_MODELOS","DimProyectoConcurso","admin_users","EquiposIntegrantesVENTAS"]
+annotation PBI_QueryOrder = ["VENTAS_activities_docs_activities","HISTORIAL_PUBLICACIONES_MODELOS","PUBLICACIONES_MODELOS","DimProyectoConcurso","admin_users","EquiposIntegrantesVENTAS","HISTORIAL_MODIFICACIONES_MODELOS","MODIFICACIONES_DIARIAS_MODELOS","PUBLICACIONES_DIARIAS_MODELOS","ACTIVIDAD_DIARIA_MODELOS"]
 
 annotation PBI_ProTooling = ["DevMode"]
 
@@ -24,6 +24,15 @@ ref table DimProyectoConcurso
 ref table LocalDateTable_980a06ac-00e1-43d3-a475-a89a54a9d39e
 ref table admin_users
 ref table EquiposIntegrantesVENTAS
+ref table HISTORIAL_MODIFICACIONES_MODELOS
+ref table LocalDateTable_8ee2e506-ec4d-4711-b067-502b561f57bf
+ref table MODIFICACIONES_DIARIAS_MODELOS
+ref table LocalDateTable_50f1d1cf-9797-413c-995a-26db8d31c05c
+ref table PUBLICACIONES_DIARIAS_MODELOS
+ref table LocalDateTable_794d892e-64ee-49b2-b392-7c3a72e3edbc
+ref table ACTIVIDAD_DIARIA_MODELOS
+ref table LocalDateTable_c13cbb42-c749-4ec2-9532-78f6588bfdcf
+ref table LocalDateTable_241ef107-fbc9-4ff4-be60-7fc0ccfde706
 
 ref cultureInfo en-US
 
