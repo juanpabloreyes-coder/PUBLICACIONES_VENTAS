@@ -6,8 +6,10 @@ $ErrorActionPreference = "Continue"
 
 $AutomationRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepositoryRoot = Split-Path -Parent $AutomationRoot
+$UpdaterPath = Join-Path $AutomationRoot "Update-PUBLICACIONES_VENTAS.ps1"
 
 $RevitSyncRoot = Join-Path $RepositoryRoot "RevitSyncLog"
+
 
 # ============================================================
 # ESTADO OPERATIVO LOCAL
@@ -17,22 +19,32 @@ $RevitSyncRoot = Join-Path $RepositoryRoot "RevitSyncLog"
 $LocalStateRoot = Join-Path $env:LOCALAPPDATA "PUBLICACIONES_VENTAS"
 
 if (-not (Test-Path -LiteralPath $LocalStateRoot)) {
-    New-Item -ItemType Directory -Path $LocalStateRoot -Force | Out-Null
+
+    New-Item `
+        -ItemType Directory `
+        -Path $LocalStateRoot `
+        -Force |
+    Out-Null
 }
 
 $SignalPath = Join-Path $LocalStateRoot "sync-change.signal"
+$PendingPath = Join-Path $LocalStateRoot "update-pending.flag"
 $PidPath = Join-Path $LocalStateRoot "monitor.pid"
 $LogPath = Join-Path $LocalStateRoot "automation.log"
 $StatePath = Join-Path $LocalStateRoot "sync-state.json"
 
 $Utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 
+
 # ============================================================
 # LOG
 # ============================================================
 
 function Write-MonitorLog {
-    param([string]$Message)
+
+    param(
+        [string]$Message
+    )
 
     $line = "{0}  MONITOR  {1}" -f `
         (Get-Date).ToString("yyyy-MM-dd HH:mm:ss"),
@@ -44,6 +56,7 @@ function Write-MonitorLog {
         $Utf8NoBom
     )
 }
+
 
 # ============================================================
 # NOTIFICACION
@@ -97,6 +110,7 @@ function Show-MonitorNotification {
     }
 }
 
+
 # ============================================================
 # ESTADO
 # ============================================================
@@ -139,6 +153,7 @@ function Save-State {
     )
 }
 
+
 # ============================================================
 # FIRMA DEL CONTENIDO
 # ============================================================
@@ -146,6 +161,7 @@ function Save-State {
 function Get-SyncSignature {
 
     if (-not (Test-Path -LiteralPath $RevitSyncRoot)) {
+
         return $null
     }
 
@@ -209,6 +225,7 @@ function Get-SyncSignature {
     }
 }
 
+
 # ============================================================
 # CONTAR CSV
 # ============================================================
@@ -216,6 +233,7 @@ function Get-SyncSignature {
 function Get-CsvCount {
 
     if (-not (Test-Path -LiteralPath $RevitSyncRoot)) {
+
         return 0
     }
 
@@ -236,6 +254,51 @@ function Get-CsvCount {
     }
 }
 
+
+# ============================================================
+# EJECUTAR UPDATER
+# ============================================================
+
+function Invoke-Updater {
+
+    param(
+        [string]$Reason
+    )
+
+    if (-not (Test-Path -LiteralPath $UpdaterPath)) {
+
+        Write-MonitorLog `
+            "ERROR: No se encontro Update-PUBLICACIONES_VENTAS.ps1."
+
+        return
+    }
+
+    try {
+
+        Write-MonitorLog `
+            "Ejecutando Update-PUBLICACIONES_VENTAS."
+
+        & powershell.exe `
+            -NoProfile `
+            -ExecutionPolicy Bypass `
+            -File $UpdaterPath `
+            -Reason $Reason `
+            -Silent
+
+        $UpdaterExitCode =
+            $LASTEXITCODE
+
+        Write-MonitorLog `
+            "Updater finalizo con codigo: $UpdaterExitCode"
+    }
+    catch {
+
+        Write-MonitorLog `
+            "ERROR al ejecutar updater: $($_.Exception.Message)"
+    }
+}
+
+
 # ============================================================
 # PROCESAR CAMBIO
 # ============================================================
@@ -252,6 +315,11 @@ function Invoke-SyncCheck {
     $csvCount =
         Get-CsvCount
 
+
+    # --------------------------------------------------------
+    # NO HAY DATOS
+    # --------------------------------------------------------
+
     if (-not $signature) {
 
         Save-State `
@@ -266,6 +334,11 @@ function Invoke-SyncCheck {
         return
     }
 
+
+    # --------------------------------------------------------
+    # LEER ESTADO ANTERIOR
+    # --------------------------------------------------------
+
     $previous = $null
 
     if (Test-Path -LiteralPath $StatePath) {
@@ -279,8 +352,16 @@ function Invoke-SyncCheck {
                 ConvertFrom-Json
         }
         catch {
+
+            Write-MonitorLog `
+                "No se pudo leer sync-state.json: $($_.Exception.Message)"
         }
     }
+
+
+    # --------------------------------------------------------
+    # FIRMA IGUAL = NO HAY CAMBIOS
+    # --------------------------------------------------------
 
     if (
         $previous -and
@@ -299,19 +380,44 @@ function Invoke-SyncCheck {
         return
     }
 
+
+    # --------------------------------------------------------
+    # FIRMA DIFERENTE = ACTUALIZACION PENDIENTE
+    # --------------------------------------------------------
+
     Save-State `
-        -Status "Cambio detectado" `
+        -Status "Actualizacion pendiente" `
         -Reason $Reason `
         -CsvCount $csvCount `
         -Signature $signature
 
+    [System.IO.File]::WriteAllText(
+        $PendingPath,
+        (Get-Date).ToString("o"),
+        $Utf8NoBom
+    )
+
     Write-MonitorLog `
-        "Cambio detectado: $csvCount archivos CSV."
+        "Actualizacion pendiente: $csvCount archivos CSV."
+
+
+    # --------------------------------------------------------
+    # NOTIFICAR
+    # --------------------------------------------------------
 
     Show-MonitorNotification `
         -Title "PUBLICACIONES_VENTAS" `
         -Message "Se detectaron nuevos datos de sincronizacion Revit."
+
+
+    # --------------------------------------------------------
+    # EJECUTAR UPDATER AUTOMATICAMENTE
+    # --------------------------------------------------------
+
+    Invoke-Updater `
+        -Reason $Reason
 }
+
 
 # ============================================================
 # EVITAR DOS MONITORES A LA VEZ
@@ -337,6 +443,7 @@ if (-not $createdNew) {
     $Utf8NoBom
 )
 
+
 # ============================================================
 # MONITOR
 # ============================================================
@@ -348,8 +455,18 @@ try {
     Write-MonitorLog `
         "Monitor iniciado."
 
+
+    # --------------------------------------------------------
+    # COMPROBACION INICIAL
+    # --------------------------------------------------------
+
     Invoke-SyncCheck `
         -Reason "Inicio del monitor"
+
+
+    # --------------------------------------------------------
+    # ASEGURAR QUE EXISTA RevitSyncLog
+    # --------------------------------------------------------
 
     if (-not (Test-Path -LiteralPath $RevitSyncRoot)) {
 
@@ -359,6 +476,11 @@ try {
             -Force |
         Out-Null
     }
+
+
+    # --------------------------------------------------------
+    # FILESYSTEMWATCHER
+    # --------------------------------------------------------
 
     $watcher =
         [System.IO.FileSystemWatcher]::new(
@@ -378,6 +500,11 @@ try {
 
     $watcher.EnableRaisingEvents = $true
 
+
+    # --------------------------------------------------------
+    # EVENTO
+    # --------------------------------------------------------
+
     $action = {
 
         try {
@@ -392,11 +519,13 @@ try {
         }
     }
 
+
     Register-ObjectEvent `
         -InputObject $watcher `
         -EventName Created `
         -Action $action |
     Out-Null
+
 
     Register-ObjectEvent `
         -InputObject $watcher `
@@ -404,17 +533,24 @@ try {
         -Action $action |
     Out-Null
 
+
     Register-ObjectEvent `
         -InputObject $watcher `
         -EventName Deleted `
         -Action $action |
     Out-Null
 
+
     Register-ObjectEvent `
         -InputObject $watcher `
         -EventName Renamed `
         -Action $action |
     Out-Null
+
+
+    # --------------------------------------------------------
+    # ESTADOS DE CONTROL
+    # --------------------------------------------------------
 
     $nextHourlyCheck =
         (Get-Date).AddHours(1)
@@ -425,13 +561,21 @@ try {
     $nextSafetyScan =
         (Get-Date).AddSeconds(15)
 
+
     Write-MonitorLog `
         "Vigilando RevitSyncLog."
 
+
+    # ========================================================
+    # BUCLE PRINCIPAL
+    # ========================================================
+
     while ($true) {
+
 
         # ====================================================
         # EVENTO DE FILESYSTEMWATCHER
+        #
         # Esperamos 5 segundos para evitar leer mientras
         # el add-in sigue escribiendo el CSV.
         # ====================================================
@@ -457,6 +601,7 @@ try {
             }
         }
 
+
         # ====================================================
         # ESCANEO DE SEGURIDAD
         # ====================================================
@@ -479,6 +624,7 @@ try {
                     $currentSignature
             }
 
+
             if (
                 $currentSignature -and
                 -not $lastSignature
@@ -488,9 +634,11 @@ try {
                     $currentSignature
             }
 
+
             $nextSafetyScan =
                 (Get-Date).AddSeconds(15)
         }
+
 
         # ====================================================
         # REVISION HORARIA
@@ -507,6 +655,7 @@ try {
             $nextHourlyCheck =
                 (Get-Date).AddHours(1)
         }
+
 
         Start-Sleep -Seconds 5
     }
@@ -531,19 +680,27 @@ finally {
             -Force `
             -ErrorAction SilentlyContinue
 
+
     if ($watcher) {
 
         $watcher.Dispose()
     }
+
 
     Remove-Item `
         -LiteralPath $PidPath `
         -Force `
         -ErrorAction SilentlyContinue
 
+
     if ($mutex) {
 
-        $mutex.ReleaseMutex()
+        try {
+
+            $mutex.ReleaseMutex()
+        }
+        catch {
+        }
 
         $mutex.Dispose()
     }
