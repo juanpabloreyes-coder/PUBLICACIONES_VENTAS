@@ -56,7 +56,7 @@ function Write-Log {
 
 
 # ============================================================
-# NOTIFICACIONES
+# NOTIFICACIONES DE WINDOWS
 # ============================================================
 
 function Show-Notification {
@@ -218,6 +218,9 @@ function Test-TargetPowerBiOpen {
         }
     }
     catch {
+
+        Write-Log `
+            "No se pudo revisar CommandLine de Power BI: $($_.Exception.Message)"
     }
 
     $windows =
@@ -312,6 +315,7 @@ try {
     Write-Log `
         "Inicio: $Reason"
 
+
     # --------------------------------------------------------
     # 1. VERIFICAR SI HAY ACTUALIZACION PENDIENTE
     # --------------------------------------------------------
@@ -335,6 +339,7 @@ try {
     $csvCount =
         $csvFiles.Count
 
+
     if ($csvCount -eq 0) {
 
         Save-UpdateState `
@@ -350,8 +355,8 @@ try {
             "ERROR: update-pending.flag existe, pero no hay CSV."
 
         Show-Notification `
-            -Title "PUBLICACIONES_VENTAS" `
-            -Message "Hay una actualizacion pendiente, pero RevitSyncLog no contiene CSV." `
+            -Title "PUBLICACIONES_VENTAS - ERROR" `
+            -Message "Hay una actualizacion pendiente, pero RevitSyncLog no contiene archivos CSV." `
             -Level Error
 
         exit 1
@@ -386,6 +391,10 @@ try {
         Test-TargetPowerBiOpen
 
 
+    # ========================================================
+    # POWER BI ESTA ABIERTO
+    # ========================================================
+
     if ($powerBiOpen) {
 
         Save-UpdateState `
@@ -402,20 +411,16 @@ try {
 
         Show-Notification `
             -Title "PUBLICACIONES_VENTAS" `
-            -Message "Nuevas modificaciones Revit detectadas. PUBLICACIONES_VENTAS requiere actualizar datos." `
+            -Message "Nuevos datos Revit detectados. En Power BI Desktop pulsa Actualizar para incorporarlos." `
             -Level Warning
 
         exit 10
     }
 
 
-    # --------------------------------------------------------
-    # 5. POWER BI ESTA CERRADO
-    #
-    # Los nuevos datos ya estan listos.
-    # NO borramos la bandera todavia porque Power BI
-    # aun no ha hecho Refresh.
-    # --------------------------------------------------------
+    # ========================================================
+    # POWER BI ESTA CERRADO
+    # ========================================================
 
     Save-UpdateState `
         -Status "Datos listos para Power BI" `
@@ -431,7 +436,8 @@ try {
 
     Show-Notification `
         -Title "PUBLICACIONES_VENTAS" `
-        -Message "Los nuevos datos Revit estan listos para incorporarse a PUBLICACIONES_VENTAS."
+        -Message "Nuevos datos Revit disponibles. Abre Power BI Desktop y pulsa Actualizar." `
+        -Level Info
 
     exit 0
 }
