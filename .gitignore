@@ -8,3 +8,6 @@ Automation/automation.log
 Automation/monitor.pid
 Automation/sync-state.json
 Automation/*.signal
+
+# Datos generados localmente para dashboard
+Data/*.json
