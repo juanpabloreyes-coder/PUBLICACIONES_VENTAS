@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>PUBLICACIONES_VENTAS Revit Sync Logger</Name>
+    <Assembly>./RevitSyncLogger.dll</Assembly>
+    <!-- Mismo AddInId que el add-in original (piloto en la maquina de Juan Pablo). No cambiarlo. -->
+    <AddInId>94A403CD-3647-4E4C-BA0A-F02AD4A0BF1D</AddInId>
+    <FullClassName>PublicacionesVentas.RevitSyncLogger.App</FullClassName>
+    <VendorId>GCPEASA</VendorId>
+    <VendorDescription>GCPEASA - PUBLICACIONES_VENTAS</VendorDescription>
+  </AddIn>
+</RevitAddIns>

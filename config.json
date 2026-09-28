@@ -1,0 +1,27 @@
+{
+  "aps": {
+    "account_id": "17fefe95-3b69-4d44-bb94-0cbec2173aea",
+    "project_id": "5f587011-eb8e-4072-b4df-f16aee3915aa"
+  },
+
+  "raiz_nombres": ["Project Files", "Archivos de proyecto", "Plans"],
+  "subcarpeta_datos": "011_WIP",
+  "excluir_proyectos": [],
+  "excluir_rvt_regex": "\\.\\d{4}\\.rvt$",
+
+  "revit_sync_log": "RevitSyncLog",
+
+  "equipos_xlsx": "C:\\Users\\Usuario\\DC\\ACCDocs\\GCPEASA\\GCP_TRANSFORMACIÓN_DIGITAL\\Project Files\\01_IMPLEMENTACIÓN_BIM\\0112_SQDCM\\Equipos e integrantes - VENTAS.xlsx",
+  "equipos_hoja": "Integrantes",
+  "equipos_incluidos": ["Diseño A", "Diseño B", "Diseño D"],
+  "alias_personas": {
+    "JUANPABLOREYESGCP": "JUAN PABLO REYES MEDINA"
+  },
+
+  "zona_horaria_utc": -6,
+
+  "cache": "cache/versiones_forma.json",
+  "json": "Data/PUBLICACIONES_VENTAS.json",
+  "plantilla": "Dashboard/Publicaciones-Modelos-Report.template.html",
+  "html": "Dashboard/Publicaciones-Modelos-Report.html"
+}

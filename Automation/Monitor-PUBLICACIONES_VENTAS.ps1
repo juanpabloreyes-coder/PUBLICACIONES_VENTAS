@@ -6,7 +6,11 @@ $ErrorActionPreference = "Continue"
 
 $AutomationRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepositoryRoot = Split-Path -Parent $AutomationRoot
-$UpdaterPath = Join-Path $AutomationRoot "Update-PUBLICACIONES_VENTAS.ps1"
+
+# Generador sin Power BI: python -m pub_sync run (Forma + RevitSyncLog + Excel)
+# El updater anterior (Update-PUBLICACIONES_VENTAS.ps1, requiere Power BI) ya no se usa.
+$PubSyncPackage = Join-Path $RepositoryRoot "pub_sync"
+$PythonExe = "python"
 
 $RevitSyncRoot = Join-Path $RepositoryRoot "RevitSyncLog"
 
@@ -265,10 +269,10 @@ function Invoke-Updater {
         [string]$Reason
     )
 
-    if (-not (Test-Path -LiteralPath $UpdaterPath)) {
+    if (-not (Test-Path -LiteralPath $PubSyncPackage)) {
 
         Write-MonitorLog `
-            "ERROR: No se encontro Update-PUBLICACIONES_VENTAS.ps1."
+            "ERROR: No se encontro la carpeta pub_sync en $RepositoryRoot."
 
         return
     }
@@ -276,25 +280,54 @@ function Invoke-Updater {
     try {
 
         Write-MonitorLog `
-            "Ejecutando Update-PUBLICACIONES_VENTAS."
+            "Ejecutando pub_sync ($Reason)."
 
-        & powershell.exe `
-            -NoProfile `
-            -ExecutionPolicy Bypass `
-            -File $UpdaterPath `
-            -Reason $Reason `
-            -Silent
+        Push-Location -LiteralPath $RepositoryRoot
 
-        $UpdaterExitCode =
-            $LASTEXITCODE
+        try {
+
+            $env:PYTHONIOENCODING = "utf-8"
+
+            $output =
+                & $PythonExe -m pub_sync run 2>&1 |
+                ForEach-Object { [string]$_ }
+
+            $UpdaterExitCode =
+                $LASTEXITCODE
+        }
+        finally {
+
+            Pop-Location
+        }
+
+        $status =
+            @($output |
+              Where-Object {
+                  $_ -match '^(EXPORTACION|SIN CAMBIOS|SIN ACTUALIZACION|ERROR)'
+              }) |
+            Select-Object -Last 1
 
         Write-MonitorLog `
-            "Updater finalizo con codigo: $UpdaterExitCode"
+            "pub_sync finalizo con codigo $UpdaterExitCode. $status"
+
+        if ($UpdaterExitCode -ne 0) {
+
+            Show-MonitorNotification `
+                -Title "PUBLICACIONES_VENTAS" `
+                -Message "No se pudo actualizar el reporte. Se conserva el anterior. Revisa automation.log." `
+                -Level Warning
+        }
+        elseif ($status -match '^EXPORTACION') {
+
+            Show-MonitorNotification `
+                -Title "PUBLICACIONES_VENTAS" `
+                -Message "Reporte de publicaciones actualizado."
+        }
     }
     catch {
 
         Write-MonitorLog `
-            "ERROR al ejecutar updater: $($_.Exception.Message)"
+            "ERROR al ejecutar pub_sync: $($_.Exception.Message)"
     }
 }
 
@@ -416,6 +449,35 @@ function Invoke-SyncCheck {
 
     Invoke-Updater `
         -Reason $Reason
+
+    return $true
+}
+
+
+# ============================================================
+# REVISION PERIODICA DE FORMA
+#
+# Una publicacion en Forma no siempre coincide con un cambio en
+# RevitSyncLog. Por eso, al iniciar y cada hora, se corre pub_sync
+# aunque los CSV no hayan cambiado (usa cache: solo descarga las
+# versiones de los modelos que tengan una version nueva).
+# ============================================================
+
+function Invoke-PeriodicCheck {
+
+    param(
+        [string]$Reason
+    )
+
+    $ran =
+        Invoke-SyncCheck `
+            -Reason $Reason
+
+    if (-not $ran) {
+
+        Invoke-Updater `
+            -Reason "$Reason (publicaciones en Forma)"
+    }
 }
 
 
@@ -460,7 +522,7 @@ try {
     # COMPROBACION INICIAL
     # --------------------------------------------------------
 
-    Invoke-SyncCheck `
+    Invoke-PeriodicCheck `
         -Reason "Inicio del monitor"
 
 
@@ -593,7 +655,7 @@ try {
                     -Force `
                     -ErrorAction SilentlyContinue
 
-                Invoke-SyncCheck `
+                $null = Invoke-SyncCheck `
                     -Reason "Cambio detectado en RevitSyncLog"
 
                 $lastSignature =
@@ -617,7 +679,7 @@ try {
                 $currentSignature -ne $lastSignature
             ) {
 
-                Invoke-SyncCheck `
+                $null = Invoke-SyncCheck `
                     -Reason "Cambio detectado por revision de seguridad"
 
                 $lastSignature =
@@ -646,7 +708,7 @@ try {
 
         if ((Get-Date) -ge $nextHourlyCheck) {
 
-            Invoke-SyncCheck `
+            Invoke-PeriodicCheck `
                 -Reason "Revision horaria"
 
             $lastSignature =
@@ -704,4 +766,4 @@ finally {
 
         $mutex.Dispose()
     }
-}
+}

@@ -11,3 +11,15 @@ Automation/*.signal
 
 # Datos generados localmente para dashboard
 Data/*.json
+
+# pub_sync: cache local de versiones de Forma
+cache/
+__pycache__/
+
+# Dashboard generado: incluye nombres del equipo y el repositorio es publico
+Dashboard/Publicaciones-Modelos-Report.html
+
+# Compilados y paquetes del add-in
+revit_addin_sync/bin/
+revit_addin_sync/obj/
+*.rar

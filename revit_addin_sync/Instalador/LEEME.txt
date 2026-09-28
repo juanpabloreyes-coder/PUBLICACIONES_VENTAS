@@ -1,0 +1,36 @@
+RevitSyncLogger - PUBLICACIONES_VENTAS
+========================================
+
+Que es esto?
+------------
+Un pequeño complemento de Revit que, cada vez que haces "Sincronizar con
+central" en un modelo Cloud Worksharing, guarda una fila con la fecha,
+tu usuario y el estado de esa sincronizacion. No modifica el modelo, no
+envia nada a internet fuera de Autodesk, no interrumpe tu trabajo.
+
+Si el modelo que sincronizas tiene el mismo nombre en mas de un proyecto
+(por ejemplo "12_ARQ_NAVE" existe tanto en GRANJAS JESSY como en GONVAUTO
+F2), la PRIMERA vez que lo sincronices te va a preguntar con una ventana
+a cual proyecto pertenece ese archivo en concreto. Solo se pregunta una
+vez por modelo -- en cuanto una persona contesta, el resto del equipo ya
+no vuelve a ver esa pregunta para ese mismo modelo.
+
+Como instalarlo
+----------------
+1. Copia esta carpeta completa a tu computadora (o abrela directo si ya
+   la tienes en el Desktop Connector).
+2. Haz doble clic en "instalar.bat".
+3. Abre Revit. Si sale un aviso de seguridad que dice "Unsigned Add-In",
+   dale clic en "Always Load". Solo aparece la primera vez.
+
+Listo, no hay que hacer nada mas. A partir de ahi, cada sincronizacion
+que hagas se registra sola.
+
+Como quitarlo
+--------------
+Si en algun momento ya no lo quieres, haz doble clic en "desinstalar.bat"
+y desaparece por completo. Ningun rastro queda en Revit ni en tu equipo.
+
+Dudas
+-----
+Cualquier cosa, pregúntale a Juan Pablo.
