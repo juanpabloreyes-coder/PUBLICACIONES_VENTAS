@@ -97,5 +97,13 @@ class APS:
 
 
 def _nombre(d):
+    """Para CARPETAS se usa 'name': cuando una carpeta se renombra en Forma, 'displayName' puede
+    quedarse con el nombre anterior (paso con HOWA, que la API seguia reportando como
+    'Z_PLANTILLA - copia'). Para archivos se mantiene displayName (nombre visible del archivo)."""
     a = d.get("attributes", {})
+    if d.get("type") == "folders":
+        nombre, visible = a.get("name") or "", a.get("displayName") or ""
+        if nombre and visible and nombre != visible:
+            log.debug("Carpeta con dos nombres en la API: name=%r displayName=%r (se usa name)", nombre, visible)
+        return nombre or visible
     return a.get("displayName") or a.get("name", "")

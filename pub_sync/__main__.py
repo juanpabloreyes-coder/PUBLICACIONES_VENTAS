@@ -3,6 +3,7 @@
 Uso (desde la carpeta PUBLICACIONES_VENTAS):
   python -m pub_sync run          # lee Forma + RevitSyncLog + Excel y genera Data\\*.json y Dashboard\\*.html
   python -m pub_sync diagnostico  # igual, pero NO escribe nada: imprime conteos y avisos
+  python -m pub_sync modelos HOWA  # lista los .rvt que encuentra en Forma (filtro opcional por proyecto)
 
 Credenciales: las mismas de PLANOS_VENTAS (variables de entorno APS_CLIENT_ID / APS_CLIENT_SECRET).
 """
@@ -77,13 +78,40 @@ def procesar(cfg, escribir_salida=True):
                     FUENTE)
 
 
+def listar_modelos(cfg, filtro=None):
+    """Imprime los .rvt que el script encuentra en Forma, por proyecto y carpeta."""
+    tz = timezone(timedelta(hours=cfg.get("zona_horaria_utc", -6)))
+    cid, sec = os.environ.get("APS_CLIENT_ID"), os.environ.get("APS_CLIENT_SECRET")
+    if not cid or not sec:
+        raise SystemExit("Falta APS_CLIENT_ID / APS_CLIENT_SECRET.")
+    modelos, _, avisos = leer_forma(APS(cid, sec), cfg, tz, _ruta(cfg.get("cache", "cache/versiones_forma.json")))
+    en_revit = {r["urn"] for r in leer_revit(_ruta(cfg.get("revit_sync_log", "RevitSyncLog")), tz) if r["urn"]}
+    filas = sorted(modelos.items(), key=lambda kv: (kv[1]["proyecto"], kv[1]["ruta"], kv[1]["archivo"]))
+    actual = None
+    for urn, m in filas:
+        if filtro and filtro.lower() not in m["proyecto"].lower():
+            continue
+        if m["proyecto"] != actual:
+            actual = m["proyecto"]
+            print(f"\n== {actual}")
+        marca = "R" if urn in en_revit else " "
+        print(f"  [{marca}] v{m['versiones']:<3} {m['archivo']:<40} {urn.split(':')[-1]}   {m['ruta']}")
+    print("\n[R] = tiene sincronizaciones en RevitSyncLog con ese URN")
+    for a in avisos:
+        print("AVISO:", a)
+
+
 def main():
     ap = argparse.ArgumentParser(prog="pub_sync")
-    ap.add_argument("cmd", choices=["run", "diagnostico"])
+    ap.add_argument("cmd", choices=["run", "diagnostico", "modelos"])
+    ap.add_argument("proyecto", nargs="?", help="solo con 'modelos': filtra por nombre de proyecto")
     ap.add_argument("--config", default=str(RAIZ / "config.json"))
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     cfg = json.loads(Path(a.config).read_text(encoding="utf-8"))
+    if a.cmd == "modelos":
+        listar_modelos(cfg, a.proyecto)
+        return
     try:
         estado = procesar(cfg, escribir_salida=(a.cmd == "run"))
     except SystemExit:

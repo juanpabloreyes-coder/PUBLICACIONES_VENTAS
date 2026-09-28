@@ -98,30 +98,34 @@ class Cache:
         self.p.write_text(json.dumps(self.d, ensure_ascii=False), encoding="utf-8")
 
 
-def _buscar_subcarpeta(aps, pid, folder_id, nombre, max_prof=6):
-    """BFS: la carpeta 011_WIP puede no ser hija directa del proyecto."""
-    nivel, obj = [folder_id], nombre.strip().lower()
+def _buscar_subcarpetas(aps, pid, folder_id, nombre, ruta, max_prof=6):
+    """Todas las carpetas llamadas 'nombre' (p.ej. 011_WIP) dentro del proyecto, en cualquier nivel
+    (p.ej. HOWA/01_D&I/011_WIP). No se detiene en la primera: un proyecto puede tener mas de una.
+    No se desciende dentro de una 011_WIP encontrada (su contenido se recorre despues)."""
+    nivel, obj, encontradas = [(folder_id, ruta)], nombre.strip().lower(), []
     for _ in range(max_prof):
         sig = []
-        for fid in nivel:
+        for fid, r in nivel:
             carpetas, _ = aps.contenido(pid, fid)
             for c in carpetas:
+                rc = f"{r}/{c['name']}"
                 if c["name"].strip().lower() == obj:
-                    return c
-                sig.append(c["id"])
+                    encontradas.append({**c, "ruta": rc})
+                else:
+                    sig.append((c["id"], rc))
         nivel = sig
         if not nivel:
             break
-    return None
+    return encontradas
 
 
-def _rvt_recursivo(aps, pid, folder_id, excluir_re):
+def _rvt_recursivo(aps, pid, folder_id, excluir_re, ruta):
     carpetas, items = aps.contenido(pid, folder_id)
     for it in items:
         if it["name"].lower().endswith(".rvt") and not (excluir_re and re.search(excluir_re, it["name"], re.I)):
-            yield it
+            yield {**it, "ruta": ruta}
     for c in carpetas:
-        yield from _rvt_recursivo(aps, pid, c["id"], excluir_re)
+        yield from _rvt_recursivo(aps, pid, c["id"], excluir_re, f"{ruta}/{c['name']}")
 
 
 def leer_forma(aps, cfg, tz, cache_path):
@@ -143,17 +147,27 @@ def leer_forma(aps, cfg, tz, cache_path):
     modelos, pubs, avisos = {}, [], []
 
     proyectos, _ = aps.contenido(pid, raiz["id"])
+    log.info("Carpetas en %s segun APS (%d): %s", raiz["name"], len(proyectos),
+             ", ".join(repr(p["name"]) for p in proyectos))
     for p in proyectos:
         nombre_p = p["name"].strip()
         if nombre_p.upper().startswith("Z_") or nombre_p.lower() in excl:
+            log.info("  %-28s omitido (plantilla o excluido)", nombre_p)
             continue
-        wip = _buscar_subcarpeta(aps, pid, p["id"], sub) if sub else p
-        if not wip:
+        ruta_p = f"{raiz['name']}/{nombre_p}"
+        wips = _buscar_subcarpetas(aps, pid, p["id"], sub, ruta_p) if sub else [{**p, "ruta": ruta_p}]
+        if not wips:
+            log.info("  %-28s sin carpeta %s", nombre_p, sub)
             avisos.append(f"Proyecto '{nombre_p}': sin carpeta '{sub}', se omitio.")
             continue
-        for it in _rvt_recursivo(aps, pid, wip["id"], excluir_re):
+        rvts = [it for w in wips for it in _rvt_recursivo(aps, pid, w["id"], excluir_re, w["ruta"])]
+        log.info("  %-28s %d .rvt en %s", nombre_p, len(rvts), ", ".join(w["ruta"] for w in wips) or "-")
+        if not rvts:
+            avisos.append(f"Proyecto '{nombre_p}': {sub} sin modelos .rvt ({', '.join(w['ruta'] for w in wips)}).")
+        for it in rvts:
             urn = it["item_id"]
-            modelos[urn] = {"proyecto": nombre_p, "modelo": modelo_sin_ext(it["name"])}
+            modelos[urn] = {"proyecto": nombre_p, "modelo": modelo_sin_ext(it["name"]),
+                            "ruta": it["ruta"], "archivo": it["name"], "versiones": it["tip_version"]}
             c = cache.d.get(urn)
             if not c or c.get("tip") != it["tip_version"]:
                 c = {"tip": it["tip_version"], "versiones": aps.versiones(pid, urn)}
