@@ -13,7 +13,7 @@
 
   "equipos_xlsx": "C:\\Users\\Usuario\\DC\\ACCDocs\\GCPEASA\\GCP_TRANSFORMACIÓN_DIGITAL\\Project Files\\01_IMPLEMENTACIÓN_BIM\\0112_SQDCM\\Equipos e integrantes - VENTAS.xlsx",
   "equipos_hoja": "Integrantes",
-  "equipos_incluidos": ["Diseño A", "Diseño B", "Diseño D"],
+  "equipos_incluidos": [],
   "alias_personas": {
     "JUANPABLOREYESGCP": "JUAN PABLO REYES MEDINA"
   },

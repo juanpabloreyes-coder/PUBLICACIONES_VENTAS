@@ -114,6 +114,10 @@ def actividad_diaria(mods, pubs, personas, equipos_incluidos):
                   "PUBLICACION ADICIONAL" if pub else "INACTIVO")
         # Responsable = usuario de la ultima sincronizacion del dia (como en Power BI)
         responsable, equipo = personas.resolver(c["usuario"]) if c["usuario"] else (None, "SIN EQUIPO")
+        # Cuentan TODOS los integrantes del listado (todos sus equipos). Solo se excluye a quien no
+        # esta en el Excel (SIN EQUIPO). 'equipos_incluidos' en config.json es un filtro opcional.
+        if equipo == "SIN EQUIPO":
+            continue
         if equipos_incluidos and equipo not in equipos_incluidos:
             continue
         filas.append({

@@ -23,7 +23,8 @@ python -m pub_sync run           # genera JSON + HTML  (o doble clic en Generar-
 - Modelo-dia: Modificado (sync exitosa) / Publicado (version nueva en Forma).
   CUMPLE, INCUMPLE, PUBLICACION ADICIONAL. Meta = Modificado; Cumplida = Modificado y Publicado.
 - Responsable = usuario de la ultima sync del dia, cruzado con el Excel (alias en `config.json`).
-- Solo se reportan los equipos de `equipos_incluidos` (Diseño A, B y D).
+- Cuentan todos los integrantes y equipos del Excel. Quien no esta en el listado queda fuera.
+  `equipos_incluidos` en `config.json` es un filtro opcional (vacio = todos los equipos).
 - Disciplina por palabras en el nombre del archivo (ARQ, EST, ELE, ESP, MEC, PLO).
 
 ## Diferencias con Power BI
