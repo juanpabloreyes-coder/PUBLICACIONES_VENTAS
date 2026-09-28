@@ -123,7 +123,7 @@ table HISTORIAL_MODIFICACIONES_MODELOS
 		mode: import
 		source =
 				let
-				    Source = Folder.Files("C:\\Users\\Usuario\\DC\\ACCDocs\\GCPEASA\\GCP_TRANSFORMACIÓN_DIGITAL\\Project Files\\01_IMPLEMENTACIÓN_BIM\\0112_SQDCM\\011211_VENTAS\\PUBLICACIONES_VENTAS\\RevitSyncLog"),
+				    Source = Folder.Files("C:\\Users\\Usuario\\DC\\ACCDocs\\GCPEASA\\TEMPORAL_GCP_BIM\\Project Files\\03_Common_Resources\\033_Costos_5D\\0337_SQDCM\\03372_PUBLICACIONES_VENTAS\\RevitSyncLog"),
 				    CsvOnly = Table.SelectRows(Source, each [Extension] = ".csv"),
 				    Tables = Table.AddColumn(CsvOnly, "Rows", each Table.PromoteHeaders(Csv.Document([Content], [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]), [PromoteAllScalars = true])),
 				    Combined = Table.Combine(Tables[Rows]),

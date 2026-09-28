@@ -1111,10 +1111,11 @@ table ACTIVIDAD_DIARIA_MODELOS
 				                Order.Ascending
 				            }
 				        }
-				    )
+				    ),
+				    #"Filtered Rows" = Table.SelectRows(Ordenado, each ([Equipo] = "Diseño A" or [Equipo] = "Diseño B" or [Equipo] = "Diseño D"))
 				
 				in
-				    Ordenado
+				    #"Filtered Rows"
 
 	annotation PBI_NavigationStepName = Navigation
 
