@@ -9,7 +9,7 @@
   "excluir_proyectos": [],
   "excluir_rvt_regex": "\\.\\d{4}\\.rvt$",
 
-  "revit_sync_log": "RevitSyncLog",
+  "revit_sync_log": "C:\\Users\\Usuario\\DC\\ACCDocs\\GCPEASA\\TEMPORAL_GCP_BIM\\Project Files\\03_Common_Resources\\033_Costos_5D\\0337_SQDCM\\03372_PUBLICACIONES_VENTAS",
 
   "equipos_xlsx": "C:\\Users\\Usuario\\DC\\ACCDocs\\GCPEASA\\GCP_TRANSFORMACIÓN_DIGITAL\\Project Files\\01_IMPLEMENTACIÓN_BIM\\0112_SQDCM\\Equipos e integrantes - VENTAS.xlsx",
   "equipos_hoja": "Integrantes",

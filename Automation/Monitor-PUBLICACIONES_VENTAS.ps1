@@ -12,7 +12,31 @@ $RepositoryRoot = Split-Path -Parent $AutomationRoot
 $PubSyncPackage = Join-Path $RepositoryRoot "pub_sync"
 $PythonExe = "python"
 
+# Carpeta donde escriben los add-ins: la misma que lee pub_sync ("revit_sync_log" en config.json).
 $RevitSyncRoot = Join-Path $RepositoryRoot "RevitSyncLog"
+
+try {
+
+    $cfg =
+        Get-Content `
+            -LiteralPath (Join-Path $RepositoryRoot "config.json") `
+            -Raw `
+            -Encoding UTF8 |
+        ConvertFrom-Json
+
+    if ($cfg.revit_sync_log) {
+
+        $RevitSyncRoot =
+            if ([System.IO.Path]::IsPathRooted($cfg.revit_sync_log)) {
+                $cfg.revit_sync_log
+            }
+            else {
+                Join-Path $RepositoryRoot $cfg.revit_sync_log
+            }
+    }
+}
+catch {
+}
 
 
 # ============================================================
@@ -625,7 +649,7 @@ try {
 
 
     Write-MonitorLog `
-        "Vigilando RevitSyncLog."
+        "Vigilando $RevitSyncRoot"
 
 
     # ========================================================
