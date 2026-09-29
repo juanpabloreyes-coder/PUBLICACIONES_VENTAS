@@ -10,8 +10,11 @@ Diferencia con Power BI: el cruce se hace por el URN del modelo (identificador u
 no por Proyecto + Nombre. El proyecto sale de la carpeta en Forma. Solo los CSV historicos
 (capturados a mano, sin URN) se resuelven por Proyecto + Nombre dentro de ese proyecto.
 """
+import json
 import logging
 from collections import defaultdict
+from datetime import date
+from pathlib import Path
 
 from .fuentes import disciplina, modelo_key
 
@@ -58,6 +61,39 @@ def resolver_modificaciones(mods, modelos):
     avisos += [f"Modelo ambiguo (mismo nombre dos veces en el proyecto): {p} / {m} ({n} sincronizaciones)."
                for (p, m), n in sorted(ambiguos.items())]
     return out, avisos
+
+
+def filtrar_modelos_addin(modelos, pubs, mods, base_path):
+    """Solo cuentan los modelos que han pasado por Revit con el add-in (tienen al menos una
+    sincronizacion en RevitSyncLog). Un .rvt cargado directo a Forma (del cliente, de un externo,
+    o nuestro subido por fuera) se ignora: no aparece en el reporte ni cuenta en los datos.
+
+    Transicion: los modelos que ya estaban en Forma la primera vez que corre este filtro quedan
+    registrados en base_path y siguen contando como hasta ahora, aunque su responsable aun no
+    tenga el add-in. Solo los modelos NUEVOS necesitan una sincronizacion con el add-in.
+    -> (publicaciones filtradas, avisos)"""
+    base_path = Path(base_path)
+    try:
+        base = set(json.loads(base_path.read_text(encoding="utf-8"))["modelos"])
+    except Exception:
+        base = set(modelos)
+        base_path.parent.mkdir(parents=True, exist_ok=True)
+        base_path.write_text(json.dumps({
+            "nota": "Modelos que ya existian en Forma al activar 'solo_modelos_con_addin'. "
+                    "Siguen contando aunque no tengan sincronizaciones del add-in.",
+            "creado": date.today().isoformat(),
+            "modelos": sorted(base)}, ensure_ascii=False, indent=1), encoding="utf-8")
+        log.info("Se registraron %d modelos existentes en %s (siguen contando como hasta ahora)",
+                 len(base), base_path)
+
+    con_addin = {r["urn"] for r in mods if r.get("urn")}
+    ignorados = {u: m for u, m in modelos.items() if u not in con_addin and u not in base}
+    if not ignorados:
+        return pubs, []
+    lista = "; ".join(sorted(f"{m['proyecto']} / {m['modelo']}" for m in ignorados.values()))
+    log.warning("Modelos que nunca pasaron por el add-in (no se incluyen): %s", lista)
+    return ([p for p in pubs if p["urn"] not in ignorados],
+            [f"{len(ignorados)} modelos nunca sincronizados con el add-in no se incluyeron: {lista}"])
 
 
 def _id(urn, proyecto, modelo):

@@ -18,7 +18,7 @@ from pathlib import Path
 
 from .aps import APS
 from .fuentes import Personas, leer_equipos, leer_forma, leer_revit
-from .actividad import actividad_diaria, historial, resolver_modificaciones
+from .actividad import actividad_diaria, filtrar_modelos_addin, historial, resolver_modificaciones
 from .reporte import escribir
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -48,9 +48,16 @@ def procesar(cfg, escribir_salida=True):
     modelos, pubs, av = leer_forma(APS(cid, sec), cfg, tz, _ruta(cfg.get("cache", "cache/versiones_forma.json")))
     avisos += av
 
-    mods = leer_revit(_ruta(cfg.get("revit_sync_log", "RevitSyncLog")), tz)
+    mods = leer_revit(_ruta(cfg.get("revit_sync_log", "RevitSyncLog")), tz, cfg["aps"]["project_id"])
     mods, av = resolver_modificaciones(mods, modelos)
     avisos += av
+
+    # Modelos que nunca pasaron por el add-in (cargados directo a Forma) no cuentan.
+    # Los que ya existian al activar esta opcion siguen contando (cache/modelos_base.json).
+    if cfg.get("solo_modelos_con_addin", True):
+        pubs, av = filtrar_modelos_addin(modelos, pubs, mods,
+                                         _ruta(cfg.get("modelos_base", "cache/modelos_base.json")))
+        avisos += av
 
     xlsx = _ruta(cfg["equipos_xlsx"])
     if xlsx.exists():
@@ -91,7 +98,7 @@ def listar_modelos(cfg, filtro=None):
     if not cid or not sec:
         raise SystemExit("Falta APS_CLIENT_ID / APS_CLIENT_SECRET.")
     modelos, _, avisos = leer_forma(APS(cid, sec), cfg, tz, _ruta(cfg.get("cache", "cache/versiones_forma.json")))
-    en_revit = {r["urn"] for r in leer_revit(_ruta(cfg.get("revit_sync_log", "RevitSyncLog")), tz) if r["urn"]}
+    en_revit = {r["urn"] for r in leer_revit(_ruta(cfg.get("revit_sync_log", "RevitSyncLog")), tz, cfg["aps"]["project_id"]) if r["urn"]}
     filas = sorted(modelos.items(), key=lambda kv: (kv[1]["proyecto"], kv[1]["ruta"], kv[1]["archivo"]))
     actual = None
     for urn, m in filas:

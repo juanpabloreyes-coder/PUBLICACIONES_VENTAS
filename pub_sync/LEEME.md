@@ -28,6 +28,10 @@ python -m pub_sync run           # genera JSON + HTML  (o doble clic en Generar-
 - Cuentan todos los integrantes y equipos del Excel. Quien no esta en el listado queda fuera.
   `equipos_incluidos` en `config.json` es un filtro opcional (vacio = todos los equipos).
 - Disciplina por palabras en el nombre del archivo (ARQ, EST, ELE, ESP, MEC, PLO).
+- Solo cuentan modelos que han pasado por Revit con el add-in (`solo_modelos_con_addin: true`).
+  Un .rvt cargado directo a Forma (del cliente o externo) se ignora y sale en los avisos.
+  Los modelos que ya existian al activar la opcion quedan en `cache\modelos_base.json` y siguen
+  contando como antes; si se borra ese archivo, se vuelve a crear con los modelos del momento.
 
 ## Diferencias con Power BI
 - El cruce Revit <-> Forma es por URN del modelo, no por nombre. El proyecto sale de la carpeta de Forma,

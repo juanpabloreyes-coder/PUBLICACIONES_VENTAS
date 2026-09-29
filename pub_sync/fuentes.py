@@ -188,9 +188,12 @@ def leer_forma(aps, cfg, tz, cache_path):
 # 2. REVIT: MODIFICACIONES
 # ================================================================
 
-def leer_revit(carpeta, tz):
-    """Todas las sincronizaciones exitosas de los CSV de RevitSyncLog."""
-    filas = []
+def leer_revit(carpeta, tz, project_id=None):
+    """Todas las sincronizaciones exitosas de los CSV de RevitSyncLog.
+    Con project_id, se descartan en silencio las de modelos de OTROS proyectos de ACC (el add-in
+    registra todo lo que se sincroniza en Revit). Los CSV historicos no traen proyecto y se conservan."""
+    propio = str(project_id or "").lower().removeprefix("b.")
+    filas, otros = [], 0
     for f in sorted(Path(carpeta).glob("*.csv")):
         with open(f, encoding="utf-8-sig", newline="") as fh:
             for r in csv.DictReader(fh):
@@ -199,6 +202,10 @@ def leer_revit(carpeta, tz):
                 dt = parse_fecha(r.get("SyncCompletedAtLocal"), tz)
                 if dt is None:
                     continue
+                pid = (r.get("RevitProjectId") or "").strip().lower().removeprefix("b.")
+                if propio and pid and pid != propio:
+                    otros += 1
+                    continue
                 filas.append({"urn": (r.get("ModelUrn") or "").strip(),
                               "proyecto_csv": proyecto_norm(r.get("ProjectLabel")),
                               "modelo": modelo_sin_ext(r.get("ModelName")),
@@ -206,7 +213,8 @@ def leer_revit(carpeta, tz):
                               "usuario": (r.get("RevitUser") or "").strip(),
                               "origen": (r.get("SourceType") or "").strip(),
                               "archivo": f.name})
-    log.info("Revit: %d sincronizaciones exitosas en %s", len(filas), carpeta)
+    log.info("Revit: %d sincronizaciones exitosas en %s (%d de otros proyectos de ACC, ignoradas)",
+             len(filas), carpeta, otros)
     return filas
 
 
