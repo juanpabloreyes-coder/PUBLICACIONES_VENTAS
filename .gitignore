@@ -23,3 +23,6 @@ Dashboard/Publicaciones-Modelos-Report.html
 revit_addin_sync/bin/
 revit_addin_sync/obj/
 *.rar
+
+# Log de la corrida mensual
+Automation/pub_sync.log
