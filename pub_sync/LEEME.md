@@ -22,7 +22,9 @@ python -m pub_sync run           # genera JSON + HTML  (o doble clic en Generar-
 ## Reglas (iguales a las consultas de Power BI)
 - Modelo-dia: Modificado (sync exitosa) / Publicado (version nueva en Forma).
   CUMPLE, INCUMPLE, PUBLICACION ADICIONAL. Meta = Modificado; Cumplida = Modificado y Publicado.
-- Responsable = usuario de la ultima sync del dia, cruzado con el Excel (alias en `config.json`).
+- Responsable = usuario de la ultima sync del dia, cruzado con el Excel. Los usuarios de Autodesk tipo
+  `mariosanchezgcp` se reconocen solos (nombre + apellido del Excel, sin 'gcp'), si coinciden con una
+  sola persona. Los que no se resuelven salen como AVISO; para esos se agrega un alias en `config.json`.
 - Cuentan todos los integrantes y equipos del Excel. Quien no esta en el listado queda fuera.
   `equipos_incluidos` en `config.json` es un filtro opcional (vacio = todos los equipos).
 - Disciplina por palabras en el nombre del archivo (ARQ, EST, ELE, ESP, MEC, PLO).

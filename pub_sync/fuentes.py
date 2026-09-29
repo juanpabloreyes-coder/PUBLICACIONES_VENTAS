@@ -235,20 +235,58 @@ def leer_equipos(ruta, hoja="Integrantes"):
     return out
 
 
+def _variantes_login(integrante):
+    """Formas en que un nombre del Excel puede aparecer como usuario de Autodesk:
+    cualquier combinacion en orden de 2 o mas de sus palabras, pegadas.
+    'Mario Alberto Sanchez Munoz' -> MARIOSANCHEZ, MARIOALBERTOSANCHEZ, MARIOSANCHEZMUNOZ, ..."""
+    from itertools import combinations
+    palabras = persona_norm(integrante).split()
+    out = set()
+    for n in range(2, len(palabras) + 1):
+        for combo in combinations(palabras, n):
+            out.add("".join(combo))
+    return out
+
+
 class Personas:
-    """Resuelve un nombre (usuario Revit o de ACC) contra el listado oficial.
-    Prioridad: alias conocido -> llave compacta exacta. Sin coincidencia: nombre original, SIN EQUIPO."""
+    """Resuelve un nombre (usuario Revit o de ACC) contra el listado oficial del Excel.
+
+    Prioridad:
+      1. Alias de config.json (para casos que no se resuelven solos).
+      2. Nombre completo igual al del Excel (sin acentos, mayusculas ni espacios).
+      3. Usuario de Autodesk tipo 'mariosanchezgcp': se quita el sufijo 'gcp' y se busca
+         el integrante cuyo nombre forme ese usuario (MARIO + SANCHEZ). Solo se acepta si
+         coincide con UNA sola persona del listado; si hay duplicados no se adivina.
+    Sin coincidencia: nombre original y SIN EQUIPO (queda registrado en no_resueltos)."""
+
+    SUFIJOS_LOGIN = ("GCP",)
 
     def __init__(self, equipos, alias=None):
         self.por_k = {e["compacta"]: e for e in equipos}
         self.alias = {persona_compacta(k): v for k, v in (alias or {}).items()}
+        variantes = {}
+        for e in equipos:
+            for v in _variantes_login(e["integrante"]):
+                variantes.setdefault(v, []).append(e)
+        self.por_login = {v: es[0] for v, es in variantes.items() if len(es) == 1}
+        self.no_resueltos = set()
+
+    def _por_login(self, k):
+        for suf in self.SUFIJOS_LOGIN:
+            if k.endswith(suf) and len(k) > len(suf):
+                e = self.por_login.get(k[: -len(suf)])
+                if e:
+                    return e
+        return self.por_login.get(k)
 
     def resolver(self, nombre):
         k = persona_compacta(nombre)
         destino = self.alias.get(k)
         if destino:
             k = persona_compacta(destino)
-        e = self.por_k.get(k)
+        e = self.por_k.get(k) or (self._por_login(k) if k else None)
         if e:
             return e["integrante"], e["equipo"]
+        if nombre:
+            self.no_resueltos.add(nombre)
         return (nombre or None), "SIN EQUIPO"

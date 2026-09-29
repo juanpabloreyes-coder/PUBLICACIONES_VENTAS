@@ -59,6 +59,12 @@ def procesar(cfg, escribir_salida=True):
         avisos.append(f"No se encontro el Excel de equipos: {xlsx}. Todos quedan SIN EQUIPO.")
         personas = Personas([], cfg.get("alias_personas"))
 
+    sin_equipo = sorted({r["usuario"] for r in mods
+                         if r["usuario"] and personas.resolver(r["usuario"])[1] == "SIN EQUIPO"})
+    if sin_equipo:
+        avisos.append("Usuarios de Revit que no se encontraron en el Excel (sus dias no cuentan; "
+                      "agregalos al listado o como alias en config.json): " + ", ".join(sin_equipo))
+
     hist = historial(pubs, personas)
     act = actividad_diaria(mods, pubs, personas, set(cfg.get("equipos_incluidos") or []))
 
