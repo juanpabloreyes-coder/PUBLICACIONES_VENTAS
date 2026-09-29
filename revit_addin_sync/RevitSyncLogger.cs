@@ -99,14 +99,19 @@ namespace PublicacionesVentas.RevitSyncLogger
             var carpetaCompartida = ResolverCarpetaCompartida() ?? carpeta;
             var modelo = doc.Title ?? "modelo";
             var modelGuid = ObtenerModelGuid(doc);
-            var proyecto = ResolverProyecto(carpetaCompartida, NormalizarNombreModelo(modelo), modelGuid);
+            var modelUrn = TryGetString(doc, "GetCloudModelUrn");
+            // Con URN, PUBLICACIONES identifica el modelo sin ambiguedad: ya no hace falta preguntar
+            // a que proyecto pertenece. Solo se pregunta si el modelo no tiene URN (no esta en la nube).
+            var proyecto = string.IsNullOrEmpty(modelUrn)
+                ? ResolverProyecto(carpetaCompartida, NormalizarNombreModelo(modelo), modelGuid)
+                : null;
 
             var registro = new SyncRecord
             {
                 SourceType = "AutomaticAddIn",
                 ProjectLabel = proyecto ?? "",
                 ModelName = modelo,
-                ModelUrn = TryGetString(doc, "GetCloudModelUrn"),
+                ModelUrn = modelUrn,
                 RevitProjectId = TryGetString(doc, "GetProjectId"),
                 RevitHubId = TryGetString(doc, "GetHubId"),
                 SyncCompletedAtLocal = DateTimeOffset.Now,

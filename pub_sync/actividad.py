@@ -137,9 +137,21 @@ def actividad_diaria(mods, pubs, personas, equipos_incluidos):
     for p in pubs:
         celda(p["urn"], p["proyecto"], p["modelo"], p["fecha_hora"].date())["pub"] = 1
 
+    listado = {}  # usuario -> esta en el Excel (cache)
+
+    def en_listado(u):
+        if u not in listado:
+            listado[u] = bool(u) and personas.resolver(u)[1] != "SIN EQUIPO"
+        return listado[u]
+
     for r in mods:
         c = celda(r["urn"], r["proyecto"], r["modelo"], r["fecha_hora"].date())
         c["mod"] = 1
+        # Responsable = ultima sincronizacion del dia DE UN INTEGRANTE DEL EXCEL. Las de personas
+        # fuera del listado no cuentan: si alguien de fuera sincroniza despues, no borra el dia
+        # del integrante que si trabajo el modelo.
+        if not en_listado(r["usuario"]):
+            continue
         if c["ultima_sync"] is None or r["fecha_hora"] > c["ultima_sync"]:
             c["ultima_sync"], c["usuario"] = r["fecha_hora"], r["usuario"]
 
@@ -148,7 +160,7 @@ def actividad_diaria(mods, pubs, personas, equipos_incluidos):
         mod, pub = c["mod"], c["pub"]
         estado = ("CUMPLE" if mod and pub else "INCUMPLE" if mod else
                   "PUBLICACION ADICIONAL" if pub else "INACTIVO")
-        # Responsable = usuario de la ultima sincronizacion del dia (como en Power BI)
+        # Responsable = ultimo integrante del Excel que sincronizo ese dia (ver arriba)
         responsable, equipo = personas.resolver(c["usuario"]) if c["usuario"] else (None, "SIN EQUIPO")
         # Cuentan TODOS los integrantes del listado (todos sus equipos). Solo se excluye a quien no
         # esta en el Excel (SIN EQUIPO). 'equipos_incluidos' en config.json es un filtro opcional.
