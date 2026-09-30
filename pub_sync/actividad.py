@@ -147,20 +147,30 @@ def actividad_diaria(mods, pubs, personas, equipos_incluidos):
     for r in mods:
         c = celda(r["urn"], r["proyecto"], r["modelo"], r["fecha_hora"].date())
         c["mod"] = 1
-        # Responsable = ultima sincronizacion del dia DE UN INTEGRANTE DEL EXCEL. Las de personas
-        # fuera del listado no cuentan: si alguien de fuera sincroniza despues, no borra el dia
-        # del integrante que si trabajo el modelo.
+        # Responsable del dia = el INTEGRANTE DEL EXCEL que MAS sincronizo ese modelo ese dia; en empate,
+        # el que sincronizo al ultimo. Las sincronizaciones de personas fuera del listado no cuentan.
+        # Se cuenta por la persona del Excel (no por el usuario de Autodesk), asi "juanpabloreyesgcp" y
+        # "Juan Pablo Reyes Medina" suman juntos.
         if not en_listado(r["usuario"]):
             continue
-        if c["ultima_sync"] is None or r["fecha_hora"] > c["ultima_sync"]:
-            c["ultima_sync"], c["usuario"] = r["fecha_hora"], r["usuario"]
+        persona = personas.resolver(r["usuario"])[0]
+        cuenta = c.setdefault("_syncs", {}).setdefault(persona, {"n": 0, "ultima": None, "usuario": None})
+        cuenta["n"] += 1
+        if cuenta["ultima"] is None or r["fecha_hora"] > cuenta["ultima"]:
+            cuenta["ultima"], cuenta["usuario"] = r["fecha_hora"], r["usuario"]
+
+    for c in dias.values():
+        syncs = c.pop("_syncs", None)
+        if syncs:
+            ganador = max(syncs.values(), key=lambda x: (x["n"], x["ultima"]))
+            c["ultima_sync"], c["usuario"] = ganador["ultima"], ganador["usuario"]
 
     filas = []
     for c in dias.values():
         mod, pub = c["mod"], c["pub"]
         estado = ("CUMPLE" if mod and pub else "INCUMPLE" if mod else
                   "PUBLICACION ADICIONAL" if pub else "INACTIVO")
-        # Responsable = ultimo integrante del Excel que sincronizo ese dia (ver arriba)
+        # Responsable = integrante del Excel con mas sincronizaciones ese dia (ver arriba)
         responsable, equipo = personas.resolver(c["usuario"]) if c["usuario"] else (None, "SIN EQUIPO")
         # Cuentan TODOS los integrantes del listado (todos sus equipos). Solo se excluye a quien no
         # esta en el Excel (SIN EQUIPO). 'equipos_incluidos' en config.json es un filtro opcional.
