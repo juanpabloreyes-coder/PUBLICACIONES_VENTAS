@@ -20,6 +20,8 @@ set PYTHONIOENCODING=utf-8
 echo ============================================== >> Automation\pub_sync.log
 echo Corrida mensual %OBJETIVO%: %date% %time% >> Automation\pub_sync.log
 
+REM Cierre mensual: busqueda completa en ACC, sin usar cache de carpetas
+set VENTAS_COMPLETO=1
 python -m pub_sync run >> Automation\pub_sync.log 2>&1
 
 if %ERRORLEVEL% EQU 0 (

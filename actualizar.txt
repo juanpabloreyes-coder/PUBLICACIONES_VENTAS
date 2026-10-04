@@ -1,0 +1,3 @@
+pub_sync run
+Dashboard\Publicaciones-Modelos-Report.html
+grupo=datos-acc

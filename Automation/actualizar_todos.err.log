@@ -1,0 +1,16 @@
+2026-10-04 00:09:42,001 INFO Carpetas en Project Files segun APS (12): 'BMW_ADECUACION', 'GAP_SJC', 'GAP_SJC_NORTE', 'GAP_TJX', 'GOHSYU', 'GONVAUTO F2', 'GRANJAS JESSY', 'HOWA', 'INNOVA_SCHOOLS', 'TUNGALOY', 'Z_PLANTILLA', 'Z_PROYECTO'
+2026-10-04 00:09:47,197 INFO   BMW_ADECUACION               6 .rvt en Project Files/BMW_ADECUACION/01_D&I/011_WIP
+2026-10-04 00:09:51,330 INFO   GAP_SJC                      1 .rvt en Project Files/GAP_SJC/01_D&I/011_WIP
+2026-10-04 00:09:56,835 INFO   GAP_SJC_NORTE                1 .rvt en Project Files/GAP_SJC_NORTE/01_D&I/011_WIP
+2026-10-04 00:09:56,835 INFO   GAP_TJX                      sin carpeta 011_WIP
+2026-10-04 00:10:02,822 INFO   GOHSYU                       3 .rvt en Project Files/GOHSYU/01_D&I/011_WIP
+2026-10-04 00:10:07,991 INFO   GONVAUTO F2                  5 .rvt en Project Files/GONVAUTO F2/01_D&I/011_WIP
+2026-10-04 00:10:12,510 INFO   GRANJAS JESSY                4 .rvt en Project Files/GRANJAS JESSY/01_D&I/011_WIP
+2026-10-04 00:10:18,927 INFO   HOWA                         4 .rvt en Project Files/HOWA/01_D&I/011_WIP
+2026-10-04 00:10:24,086 INFO   INNOVA_SCHOOLS               0 .rvt en Project Files/INNOVA_SCHOOLS/01_D&I/011_WIP
+2026-10-04 00:10:29,562 INFO   TUNGALOY                     1 .rvt en Project Files/TUNGALOY/01_D&I/011_WIP
+2026-10-04 00:10:29,562 INFO   Z_PLANTILLA                  omitido (plantilla o excluido)
+2026-10-04 00:10:29,563 INFO   Z_PROYECTO                   omitido (plantilla o excluido)
+2026-10-04 00:10:29,565 INFO Forma: 25 modelos .rvt, 143 publicaciones (versiones)
+2026-10-04 00:10:29,580 INFO Revit: 692 sincronizaciones exitosas en C:\Users\Usuario\DC\ACCDocs\GCPEASA\TEMPORAL_GCP_BIM\Project Files\03_Common_Resources\033_Costos_5D\0337_SQDCM\03372_PUBLICACIONES_VENTAS (99 de otros proyectos de ACC, ignoradas)
+2026-10-04 00:10:29,763 INFO Actividad diaria: 76 filas (177 modelo-dia antes del filtro de equipos)

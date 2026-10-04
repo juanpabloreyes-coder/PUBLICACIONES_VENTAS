@@ -128,6 +128,21 @@ def _rvt_recursivo(aps, pid, folder_id, excluir_re, ruta):
         yield from _rvt_recursivo(aps, pid, c["id"], excluir_re, f"{ruta}/{c['name']}")
 
 
+
+def cache_vigente(guardado):
+    """Regla de cache de carpetas de ACC (igual en todos los reportes):
+    se usa solo si se guardo HOY y la corrida no es completa. Es completa el cierre mensual
+    (run_pipeline.bat pone VENTAS_COMPLETO=1) y la primera corrida de cada dia; asi el cierre nunca
+    se pierde nada y durante el dia las actualizaciones tardan segundos."""
+    import os
+    if os.environ.get("VENTAS_COMPLETO") == "1":
+        return False
+    try:
+        return datetime.fromisoformat(str(guardado)).date() == datetime.now().date()
+    except Exception:
+        return False
+
+
 def leer_forma(aps, cfg, tz, cache_path):
     """-> (modelos, publicaciones, avisos)
     modelos: {urn: {proyecto, modelo}}  (catalogo de .rvt en Forma, para resolver el proyecto)
@@ -146,6 +161,18 @@ def leer_forma(aps, cfg, tz, cache_path):
     cache = Cache(cache_path)
     modelos, pubs, avisos = {}, [], []
 
+    # Donde esta la 011_WIP de cada proyecto (buscarla recorre todo el proyecto y es lo que mas tarda).
+    # Se reusa durante el dia (cache_vigente); el contenido de cada 011_WIP y sus versiones siempre se leen frescos.
+    ubic_p = Path(cache_path).with_name("ubicacion_wip.json")
+    try:
+        ubic = json.loads(ubic_p.read_text(encoding="utf-8"))
+        if not cache_vigente(ubic.get("guardado")):
+            ubic = {}
+    except Exception:
+        ubic = {}
+    wips_cache = ubic.get("proyectos", {}) if ubic else {}
+    nuevas = {}
+
     proyectos, _ = aps.contenido(pid, raiz["id"])
     log.info("Carpetas en %s segun APS (%d): %s", raiz["name"], len(proyectos),
              ", ".join(repr(p["name"]) for p in proyectos))
@@ -155,12 +182,26 @@ def leer_forma(aps, cfg, tz, cache_path):
             log.info("  %-28s omitido (plantilla o excluido)", nombre_p)
             continue
         ruta_p = f"{raiz['name']}/{nombre_p}"
-        wips = _buscar_subcarpetas(aps, pid, p["id"], sub, ruta_p) if sub else [{**p, "ruta": ruta_p}]
+        if not sub:
+            wips = [{**p, "ruta": ruta_p}]
+        elif p["id"] in wips_cache:
+            wips = wips_cache[p["id"]]
+        else:
+            wips = [{"id": w["id"], "name": w.get("name", ""), "ruta": w["ruta"]} for w in _buscar_subcarpetas(aps, pid, p["id"], sub, ruta_p)]
+        nuevas[p["id"]] = wips
         if not wips:
             log.info("  %-28s sin carpeta %s", nombre_p, sub)
             avisos.append(f"Proyecto '{nombre_p}': sin carpeta '{sub}', se omitio.")
             continue
-        rvts = [it for w in wips for it in _rvt_recursivo(aps, pid, w["id"], excluir_re, w["ruta"])]
+        try:
+            rvts = [it for w in wips for it in _rvt_recursivo(aps, pid, w["id"], excluir_re, w["ruta"])]
+        except Exception:
+            if p["id"] not in wips_cache:
+                raise
+            # La 011_WIP guardada ya no existe (se movio o borro): se busca de nuevo
+            wips = [{"id": w["id"], "name": w.get("name", ""), "ruta": w["ruta"]} for w in _buscar_subcarpetas(aps, pid, p["id"], sub, ruta_p)]
+            nuevas[p["id"]] = wips
+            rvts = [it for w in wips for it in _rvt_recursivo(aps, pid, w["id"], excluir_re, w["ruta"])]
         log.info("  %-28s %d .rvt en %s", nombre_p, len(rvts), ", ".join(w["ruta"] for w in wips) or "-")
         if not rvts:
             avisos.append(f"Proyecto '{nombre_p}': {sub} sin modelos .rvt ({', '.join(w['ruta'] for w in wips)}).")
@@ -180,6 +221,12 @@ def leer_forma(aps, cfg, tz, cache_path):
                              "version": v["numero"], "version_id": v["version_id"],
                              "fecha_hora": fh, "publicado_por": v["creado_por"] or ""})
     cache.save()
+    try:
+        ubic_p.parent.mkdir(parents=True, exist_ok=True)
+        ubic_p.write_text(json.dumps({"guardado": ubic.get("guardado") if ubic else datetime.now().isoformat(timespec="seconds"),
+                                      "proyectos": nuevas}, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
     log.info("Forma: %d modelos .rvt, %d publicaciones (versiones)", len(modelos), len(pubs))
     return modelos, pubs, avisos
 
