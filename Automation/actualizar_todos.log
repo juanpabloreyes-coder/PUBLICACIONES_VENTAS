@@ -1,8 +1,0 @@
-Forma: 25 modelos .rvt, 143 publicaciones
-Revit: 692 sincronizaciones exitosas
-Actividad diaria: 76 filas  {'CUMPLE': 21, 'INCUMPLE': 55}
-AVISO: Proyecto 'GAP_TJX': sin carpeta '011_WIP', se omitio.
-AVISO: Proyecto 'INNOVA_SCHOOLS': 011_WIP sin modelos .rvt (Project Files/INNOVA_SCHOOLS/01_D&I/011_WIP).
-AVISO: Usuarios de Revit que no se encontraron en el Excel (sus dias no cuentan; agregalos al listado o como alias en config.json): Elsa Daniela Cervantes Guevara, Juan Pablo Reyes Medina, Omar Sandoval Ramirez, juanpabloreyesgcp
-
-SIN CAMBIOS: Activity=76, History=143, Models=12. Se conservan el JSON y el HTML existentes.

@@ -30,3 +30,5 @@ Automation/pub_sync.log
 # Respaldos de automatizaciones y add-in compilado
 *.before-*.ps1
 revit_addin_sync/Instalador/*.dll
+
+Automation/actualizar_todos*.log
