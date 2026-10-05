@@ -145,7 +145,8 @@ def escribir(activity_rows, history_rows, avisos, json_path, template_path, html
         prev = json.loads(json_path.read_text(encoding="utf-8-sig"))
         prev_cmp = {k: prev.get(k) for k in comparable}
         if json.dumps(prev_cmp, sort_keys=True, default=str) == json.dumps(comparable, sort_keys=True, default=str) \
-                and prev.get("source") == fuente and html_path.exists():
+                and prev.get("source") == fuente and html_path.exists() \
+                and html_path.stat().st_mtime >= Path(template_path).stat().st_mtime:
             return (f"SIN CAMBIOS: Activity={len(activity_rows)}, History={len(history_rows)}, "
                     f"Models={len(data['models'])}. Se conservan el JSON y el HTML existentes.")
     except Exception:
